@@ -3,6 +3,7 @@
 import {
   ArrowRight,
   Calendar,
+  CheckCircle2,
   ChevronLeft,
   Link,
   Tag,
@@ -11,7 +12,6 @@ import {
 import { Suspense, useEffect, useState } from "react";
 
 // --- Mock Data ---
-// In a real application, this would come from an API call
 const MOCK_TRAINS = [
   {
     id: "KA-101",
@@ -52,19 +52,25 @@ const MOCK_TRAINS = [
 ];
 
 // --- Helper Components ---
-
-// A single card representing a train option
 function TrainCard({
   train,
   origin,
   destination,
+  onSelect,
+  isSelected,
 }: {
   train: (typeof MOCK_TRAINS)[0];
   origin: string;
   destination: string;
+  onSelect: (train: any) => void;
+  isSelected: boolean;
 }) {
   return (
-    <div className="border-border border-2 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-2xl hover:-translate-y-1 bg-card">
+    <div
+      className={`border-2 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-2xl hover:-translate-y-1 bg-card ${
+        isSelected ? "border-primary ring-2 ring-primary" : "border-border"
+      }`}
+    >
       <div className="p-5">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-bold text-primary">{train.name}</h3>
@@ -101,20 +107,30 @@ function TrainCard({
             /pax
           </span>
         </p>
-        <button className="bg-primary text-primary-foreground font-bold py-2 px-5 rounded-lg hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg">
-          Select
+        <button
+          onClick={() => onSelect(train)}
+          disabled={isSelected}
+          className="bg-primary text-primary-foreground font-bold py-2 px-5 rounded-lg hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg disabled:bg-muted-foreground disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {isSelected ? (
+            <>
+              <CheckCircle2 size={16} /> Selected
+            </>
+          ) : (
+            "Select"
+          )}
         </button>
       </div>
     </div>
   );
 }
 
-// The main component that reads params and displays results
 function SearchResults() {
   const [searchData, setSearchData] = useState<any>(null);
+  const [selectedDeparture, setSelectedDeparture] = useState<any>(null);
+  const [selectedReturn, setSelectedReturn] = useState<any>(null);
 
   useEffect(() => {
-    // We use the standard browser URLSearchParams API to read the query string
     const params = new URLSearchParams(window.location.search);
     const data = {
       operator: params.get("operator") || "N/A",
@@ -127,9 +143,32 @@ function SearchResults() {
       infants: params.get("infants") || "0",
     };
     setSearchData(data);
-  }, []); // The empty dependency array ensures this runs only once on component mount
+  }, []);
 
-  // Show a loading state until the search data is parsed from the URL
+  const handleProceed = () => {
+    const params = new URLSearchParams();
+
+    // Add original search data
+    Object.entries(searchData).forEach(([key, value]) => {
+      if (value) params.append(key, String(value));
+    });
+
+    // Add selected departure train data
+    Object.entries(selectedDeparture).forEach(([key, value]) => {
+      params.append(`departure_${key}`, String(value));
+    });
+
+    // Add selected return train data if it exists
+    if (selectedReturn) {
+      Object.entries(selectedReturn).forEach(([key, value]) => {
+        params.append(`return_${key}`, String(value));
+      });
+    }
+
+    // Navigate to the booking page
+    window.location.href = `/your-booking?${params.toString()}`;
+  };
+
   if (!searchData) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -140,9 +179,13 @@ function SearchResults() {
 
   const totalPassengers =
     parseInt(searchData.adults) + parseInt(searchData.infants);
+  const canProceed =
+    searchData.tripType === "round-trip"
+      ? selectedDeparture && selectedReturn
+      : selectedDeparture;
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-muted pb-32">
       <header className="bg-background shadow-md sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link
@@ -156,7 +199,6 @@ function SearchResults() {
       </header>
 
       <main className="container mx-auto p-4 md:p-8">
-        {/* Search Summary Card */}
         <div className="bg-card p-5 rounded-xl shadow-md border border-border mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-card-foreground">
             {searchData.origin}{" "}
@@ -179,7 +221,6 @@ function SearchResults() {
           </div>
         </div>
 
-        {/* Departure Results */}
         <section>
           <h2 className="text-2xl font-bold mb-4 text-foreground">
             Departure Results
@@ -191,12 +232,15 @@ function SearchResults() {
                 train={train}
                 origin={searchData.origin}
                 destination={searchData.destination}
+                isSelected={selectedDeparture?.id === train.id}
+                onSelect={(selectedTrain) =>
+                  setSelectedDeparture(selectedTrain)
+                }
               />
             ))}
           </div>
         </section>
 
-        {/* Return Results (only if round-trip) */}
         {searchData.tripType === "round-trip" && searchData.returnDate && (
           <section className="mt-12">
             <div className="flex items-center justify-between mb-4">
@@ -209,24 +253,54 @@ function SearchResults() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* We reverse the mock data for variety, and swap origin/destination */}
               {[...MOCK_TRAINS].reverse().map((train) => (
                 <TrainCard
                   key={`${train.id}-return`}
                   train={train}
                   origin={searchData.destination}
                   destination={searchData.origin}
+                  isSelected={selectedReturn?.id === train.id}
+                  onSelect={(selectedTrain) => setSelectedReturn(selectedTrain)}
                 />
               ))}
             </div>
           </section>
         )}
       </main>
+
+      {selectedDeparture && (
+        <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t-2 border-border shadow-2xl p-4 z-20">
+          <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-center md:text-left">
+              <p className="font-bold text-foreground">
+                Departure:{" "}
+                <span className="font-normal text-primary">
+                  {selectedDeparture.name} ({selectedDeparture.departureTime})
+                </span>
+              </p>
+              {selectedReturn && (
+                <p className="font-bold text-foreground">
+                  Return:{" "}
+                  <span className="font-normal text-primary">
+                    {selectedReturn.name} ({selectedReturn.departureTime})
+                  </span>
+                </p>
+              )}
+            </div>
+            <button
+              onClick={handleProceed}
+              disabled={!canProceed}
+              className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg text-lg w-full md:w-auto hover:bg-primary/90 transition-colors shadow-lg disabled:bg-muted-foreground disabled:cursor-not-allowed"
+            >
+              Continue
+            </button>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
 
-// The main page component
 export default function TrainListPage() {
   return (
     <Suspense

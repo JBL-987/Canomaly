@@ -97,7 +97,7 @@ export function TrainBookingForm() {
     params.append("infants", formData.infants.toString());
 
     // Use standard window location for navigation
-    window.location.href = `/trainlist?${params.toString()}`;
+    window.location.href = `/train-list?${params.toString()}`;
   };
 
   const incrementPassengers = (type: "adults" | "infants") => {
