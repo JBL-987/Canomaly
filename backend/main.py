@@ -5,7 +5,6 @@ app = FastAPI()
 
 app.include_router(ticket_router.router)
 
-
 @app.get("/")
 async def root():
     return {
