@@ -1,0 +1,7 @@
+fastapi 
+uvicorn 
+pydantic[email] 
+python-multipart 
+sqlalchemy 
+alembic
+supabase
