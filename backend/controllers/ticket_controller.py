@@ -9,9 +9,9 @@ import random
 
 # Configuration
 TICKET_CLASSES = {
-    1: {'name': 'Ekonomi', 'min': 80000, 'max': 140000, 'base': 100000},
-    2: {'name': 'Bisnis', 'min': 150000, 'max': 150000, 'base': 150000},
-    3: {'name': 'Eksekutif', 'min': 250000, 'max': 350000, 'base': 300000}
+    1: {'name': 'Economy', 'min': 80000, 'max': 140000, 'base': 100000},
+    2: {'name': 'Business', 'min': 150000, 'max': 150000, 'base': 150000},
+    3: {'name': 'Executive', 'min': 250000, 'max': 350000, 'base': 300000}
 }
 
 # ---------------- Helper Functions ---------------- #
@@ -120,7 +120,6 @@ def validate_ticket_price(ticket_class_id: int, final_price: float) -> dict:
         'class_name': class_info['name']
     }
 
-
 # ---------------- Core Functions ---------------- #
 
 def buy_ticket(ticket: TicketCreate) -> dict:
@@ -134,7 +133,7 @@ def buy_ticket(ticket: TicketCreate) -> dict:
     # Prediksi anomaly / scalper
     result = api_detector.predict(ticket_features)
     pred_label = -1 if result['prediction'] == 'anomaly' else 1
-    score = result['score']
+    score = result['score'] * -100 
     risk_score = result.get('risk_score', 0)
     risk_level = result.get('risk_level', 'Low')
     is_scalper = result.get('is_scalper', False)
@@ -189,7 +188,9 @@ def buy_ticket(ticket: TicketCreate) -> dict:
             "base_price": base_price,
             "discount_amount": discount / ticket.num_tickets if discount > 0 else 0,
             "final_price": ticket_price,
-            "status_id": 1
+            "status_id": 1,
+            "station_from_id": ticket.station_from_id,
+            "station_to_id": ticket.station_to_id,
         })
 
     # Build response
