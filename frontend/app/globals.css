@@ -39,10 +39,18 @@
     --chart-5: 0 70% 60%;
 
     --radius: 0.5rem;
-  }
-}
 
-@layer base {
+    /* === Admin Sidebar Theme === */
+    --sidebar-bg: 224 71% 4%;
+    --sidebar-border: 224 71% 10%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 214 49% 49%;
+    --sidebar-accent: 239 99% 40%;
+    --sidebar-active-bg: 224 71% 12%;
+    --sidebar-active-foreground: 0 0% 100%;
+  }
+
+  /* Your other base styles are now inside the same block */
   * {
     @apply border-border;
   }
