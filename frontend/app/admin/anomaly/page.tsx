@@ -211,11 +211,11 @@ export default function AnomalyDetectionPage() {
                         <Badge
                           variant="outline"
                           className={cn(
-                            anomaly.severity === "high" &&
+                            anomaly.severity === "High" &&
                               "border-destructive text-destructive",
-                            anomaly.severity === "medium" &&
+                            anomaly.severity === "Medium" &&
                               "border-accent text-accent-foreground",
-                            anomaly.severity === "low" &&
+                            anomaly.severity === "Low" &&
                               "border-chart-4 text-chart-4"
                           )}
                         >

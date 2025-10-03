@@ -28,17 +28,17 @@ export default function LandingPage() {
               <span>AI-Powered Anomaly Detection</span>
             </div>
             <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-balance md:text-7xl">
-              The fastest platform for{" "}
-              <span className="text-primary">train ticket</span> anomaly
-              detection
+              Protect train ticket sales with{" "}
+              <span className="text-primary">Canomaly</span>
             </h1>
             <p className="mb-8 text-xl text-muted-foreground text-balance md:text-2xl">
-              Detect fraudulent transactions and anomalies in real-time with
-              industry-leading AI models and comprehensive monitoring tools.
+              Canomaly quietly monitors ticket transactions in real-time,
+              spotting unusual patterns and potential fraud before it impacts
+              your operations.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" className="min-w-[200px]" asChild>
-                <Link href="/admin/homepage/1">
+                <Link href="/admin/homepage">
                   Start Monitoring
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -60,20 +60,20 @@ export default function LandingPage() {
       <section className="border-y border-border bg-muted/30 py-12">
         <div className="container mx-auto px-4">
           <p className="mb-8 text-center text-sm font-medium uppercase tracking-wider text-muted-foreground">
-            Trusted by leading railway operators
+            Trusted by railway operators to keep ticketing safe
           </p>
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="flex items-center justify-center text-2xl font-bold text-muted-foreground/60">
-              RailCorp
+              KAI
             </div>
             <div className="flex items-center justify-center text-2xl font-bold text-muted-foreground/60">
-              MetroLink
+              JAYA
             </div>
             <div className="flex items-center justify-center text-2xl font-bold text-muted-foreground/60">
-              TransitHub
+              JAYA
             </div>
             <div className="flex items-center justify-center text-2xl font-bold text-muted-foreground/60">
-              ExpressRail
+              JAYA
             </div>
           </div>
         </div>
@@ -85,11 +85,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-4 md:divide-x md:divide-y-0">
             <div className="flex flex-col items-center justify-center p-8">
               <div className="mb-2 text-4xl font-bold text-balance">99.8%</div>
-              <div className="mb-1 text-sm text-muted-foreground text-balance">
-                Detection accuracy
-              </div>
-              <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                RailCorp
+              <div className="mb-1 text-sm text-muted-foreground text-balance text-center">
+                Accuracy you can trust
               </div>
             </div>
             <div className="flex flex-col items-center justify-center p-8">
@@ -97,28 +94,19 @@ export default function LandingPage() {
                 &lt;100ms
               </div>
               <div className="mb-1 text-sm text-muted-foreground text-balance">
-                Response time
-              </div>
-              <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                MetroLink
+                Instant insights
               </div>
             </div>
             <div className="flex flex-col items-center justify-center p-8">
               <div className="mb-2 text-4xl font-bold text-balance">85%</div>
               <div className="mb-1 text-sm text-muted-foreground text-balance">
-                Fraud reduction
-              </div>
-              <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                TransitHub
+                Fewer fraudulent transactions
               </div>
             </div>
             <div className="flex flex-col items-center justify-center p-8">
               <div className="mb-2 text-4xl font-bold text-balance">24/7</div>
-              <div className="mb-1 text-sm text-muted-foreground text-balance">
-                Real-time monitoring
-              </div>
-              <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                ExpressRail
+              <div className="mb-1 text-sm text-muted-foreground text-balance text-center">
+                Always monitoring
               </div>
             </div>
           </div>
@@ -130,11 +118,12 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-4xl font-bold text-balance md:text-5xl">
-              Comprehensive anomaly detection
+              Smart anomaly detection for every transaction
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground text-pretty">
-              Powerful AI-driven tools to detect, analyze, and prevent
-              fraudulent ticket transactions across your entire railway network.
+              Canomaly quietly works in the background, analyzing ticket
+              transactions and providing insights, alerts, and logs to keep your
+              operations safe.
             </p>
           </div>
 
@@ -147,8 +136,8 @@ export default function LandingPage() {
                 Real-time Protection
               </h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                Monitor every transaction as it happens with advanced AI
-                algorithms that detect suspicious patterns instantly.
+                Monitor every transaction instantly, spotting unusual patterns
+                with advanced AI.
               </p>
             </div>
 
@@ -160,8 +149,8 @@ export default function LandingPage() {
                 Anomaly Detection
               </h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                Machine learning models trained on millions of transactions to
-                identify fraudulent behavior with 99.8% accuracy.
+                AI models trained on millions of transactions identify
+                suspicious behavior quietly and accurately.
               </p>
             </div>
 
@@ -173,8 +162,8 @@ export default function LandingPage() {
                 Advanced Analytics
               </h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                Comprehensive dashboards with detailed insights into ticket
-                sales, anomalies, and fraud patterns.
+                Dashboards give you insights into ticket sales, anomalies, and
+                fraud trends effortlessly.
               </p>
             </div>
 
@@ -186,8 +175,8 @@ export default function LandingPage() {
                 Instant Alerts
               </h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                Get notified immediately when suspicious activity is detected
-                with customizable alert thresholds.
+                Receive notifications when suspicious activity is detected, so
+                you can act quickly.
               </p>
             </div>
 
@@ -196,11 +185,10 @@ export default function LandingPage() {
                 <Database className="h-6 w-6 text-primary" />
               </div>
               <h3 className="mb-2 text-lg font-semibold text-balance">
-                Complete Audit Trail
+                Complete History
               </h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                Full transaction history with detailed logs for compliance and
-                forensic analysis.
+                Access full logs of every transaction for auditing and analysis.
               </p>
             </div>
 
@@ -212,8 +200,7 @@ export default function LandingPage() {
                 Enterprise Security
               </h3>
               <p className="text-sm text-muted-foreground text-pretty">
-                Bank-level encryption and security protocols to protect
-                sensitive transaction data.
+                Bank-level encryption ensures sensitive data stays safe.
               </p>
             </div>
           </div>
@@ -233,13 +220,12 @@ export default function LandingPage() {
                 Platform Overview
               </div>
               <h2 className="mb-6 text-4xl font-bold text-balance md:text-5xl">
-                Built for railway operations teams
+                Designed for railway operations teams
               </h2>
               <p className="mb-8 text-lg text-muted-foreground text-pretty">
-                A unified platform that brings together anomaly detection,
-                ticket monitoring, and comprehensive analytics. Empower your
-                team to identify and prevent fraud before it impacts your
-                operations.
+                Canomaly brings anomaly detection, ticket monitoring, and
+                analytics together in one place, helping your team spot and
+                prevent fraud before it affects operations.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -249,8 +235,8 @@ export default function LandingPage() {
                   <div>
                     <h3 className="mb-1 font-semibold">Predictive Analytics</h3>
                     <p className="text-sm text-muted-foreground">
-                      Forecast potential fraud patterns before they occur using
-                      historical data and AI predictions.
+                      Anticipate fraud patterns using historical data and AI
+                      predictions.
                     </p>
                   </div>
                 </div>
@@ -261,8 +247,8 @@ export default function LandingPage() {
                   <div>
                     <h3 className="mb-1 font-semibold">Live Monitoring</h3>
                     <p className="text-sm text-muted-foreground">
-                      Track all ticket transactions in real-time with instant
-                      anomaly flagging and alerts.
+                      Track transactions in real-time and receive instant alerts
+                      for anomalies.
                     </p>
                   </div>
                 </div>
@@ -273,8 +259,8 @@ export default function LandingPage() {
                   <div>
                     <h3 className="mb-1 font-semibold">Complete History</h3>
                     <p className="text-sm text-muted-foreground">
-                      Access full transaction logs with advanced filtering and
-                      export capabilities.
+                      Access full transaction logs with filtering and export
+                      options.
                     </p>
                   </div>
                 </div>
@@ -350,25 +336,18 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-12 text-center">
             <h2 className="mb-4 text-4xl font-bold text-balance md:text-5xl">
-              Start protecting your railway operations today
+              Keep your railway operations safe with Canomaly
             </h2>
             <p className="mb-8 text-lg text-muted-foreground text-pretty">
-              Join leading railway operators using TrainGuard AI to detect and
-              prevent fraudulent ticket transactions.
+              Join operators using Canomaly to detect suspicious activity in
+              real-time, prevent fraud, and gain valuable insights effortlessly.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" className="min-w-[200px]" asChild>
-                <Link href="/admin/homepage/1">
+                <Link href="/admin/homepage">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="min-w-[200px] bg-transparent"
-              >
-                Contact Sales
               </Button>
             </div>
           </div>
@@ -378,17 +357,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border bg-muted/30 py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Shield className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-semibold">TrainGuard AI</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 TrainGuard AI. All rights reserved.
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            © 2025 Canomaly.
+          </p>
         </div>
       </footer>
     </div>
