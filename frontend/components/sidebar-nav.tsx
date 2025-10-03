@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   Train,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,6 +24,11 @@ const navItems = [
     title: "Anomaly Detection",
     href: "/admin/anomaly",
     icon: AlertTriangle,
+  },
+  {
+    title: "Admin Assistant",
+    href: "/admin/chat",
+    icon: User,
   },
   {
     title: "Tickets Log",

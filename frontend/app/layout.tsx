@@ -11,6 +11,9 @@ const montserrat = Montserrat({
 export const metadata = {
   title: "Canomaly",
   description: "Your train booking app",
+  icons: {
+    icon: "/canomaly_logo.svg", 
+  },
 };
 
 export default function RootLayout({

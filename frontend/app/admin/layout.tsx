@@ -10,7 +10,6 @@ import { Suspense } from "react";
 export const metadata: Metadata = {
   title: "Train Anomaly Detection Dashboard",
   description: "Admin dashboard for monitoring train ticket anomalies",
-  generator: "v0.app",
 };
 
 export default function RootLayout({
