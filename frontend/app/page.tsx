@@ -7,7 +7,7 @@ export default function Home() {
     <>
       <VantaBg />
       <main style={{ position: 'relative', zIndex: 1 }}>
-        <nav className="flex justify-between border-b-white/10 border-b-4 items-center px-6 py-8 ">
+        <nav className="flex justify-between bg-slate-800/90 items-center px-6 py-8 text-white">
           <h1 className="text-3xl font-bold">Canomaly</h1>
           <AuthButton />
         </nav>
