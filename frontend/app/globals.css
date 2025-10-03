@@ -4,58 +4,94 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 215 25% 27%;
-
+    /* === Main Theme (Daylight Express) === */
+    --background: 220 60% 98%;
+    --foreground: 220 20% 25%;
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%;
-
+    --card-foreground: 220 20% 25%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
-
-    --primary: 210 70% 50%;
+    --popover-foreground: 220 20% 25%;
+    --primary: 225 60% 50%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 30% 95%;
-    --secondary-foreground: 215 25% 27%;
-
-    --muted: 210 20% 90%;
-    --muted-foreground: 210 15% 45%;
-
-    --accent: 210 40% 85%;
-    --accent-foreground: 215 25% 27%;
-
-    --destructive: 0 80% 55%;
+    --secondary: 220 30% 94%;
+    --secondary-foreground: 220 20% 25%;
+    --muted: 220 30% 94%;
+    --muted-foreground: 220 20% 55%;
+    --accent: 220 30% 94%;
+    --accent-foreground: 220 20% 25%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 210 70% 50%;
-
-    --chart-1: 210 70% 50%;
-    --chart-2: 200 60% 65%;
-    --chart-3: 225 50% 40%;
-    --chart-4: 190 45% 55%;
-    --chart-5: 0 70% 60%;
-
+    --warning: 40 95% 55%;
+    --border: 220 30% 90%;
+    --input: 220 30% 90%;
+    --ring: 225 60% 50%;
     --radius: 0.5rem;
 
-    /* === Admin Sidebar Theme === */
-    --sidebar-bg: 224 71% 4%;
-    --sidebar-border: 224 71% 10%;
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 214 49% 49%;
-    --sidebar-accent: 239 99% 40%;
-    --sidebar-active-bg: 224 71% 12%;
-    --sidebar-active-foreground: 0 0% 100%;
+    /* === Chart Colors (Professional) === */
+    --chart-1: hsl(225 60% 50%);
+    --chart-2: hsl(195 70% 45%);
+    --chart-3: hsl(240 40% 55%);
+    --chart-4: hsl(220 20% 60%);
+    --chart-5: hsl(0 80% 65%);
+
+    /* === Admin Sidebar Theme (Preserved) === */
+    --sidebar-bg: hsl(224 71% 4%);
+    --sidebar-border: hsl(224 71% 10%);
+    --sidebar-foreground: hsl(210 40% 90%);
+    --sidebar-primary: hsl(214 49% 49%);
+    --sidebar-accent: hsl(239 99% 40%);
+    --sidebar-active-bg: hsl(224 71% 12%);
+    --sidebar-active-foreground: hsl(0 0% 100%);
   }
 
-  /* Your other base styles are now inside the same block */
+  /* Base body styles */
   * {
     @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
+
+    /* Subtle dot pattern for texture */
+    background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Keyframes for aurora effect */
+  @keyframes aurora {
+    from {
+      background-position: 50% 50%, 50% 50%;
+    }
+
+    to {
+      background-position: 350% 50%, 350% 50%;
+    }
+  }
+}
+
+@layer components {
+
+  /* Refined card hover effect for light theme */
+  .card {
+    box-shadow: 0 1px 3px hsla(var(--foreground), 0.03), 0 4px 8px hsla(var(--foreground), 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 2px 4px hsla(var(--foreground), 0.04), 0 8px 16px hsla(var(--foreground), 0.08);
+  }
+
+  /* Glowing effect for primary buttons */
+  .btn-primary-glow {
+    @apply bg-primary text-primary-foreground;
+    box-shadow: 0 4px 14px hsla(var(--primary), 0.25);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+
+  .btn-primary-glow:hover {
+    @apply bg-primary/90;
+    box-shadow: 0 6px 20px hsla(var(--primary), 0.3);
+    transform: translateY(-2px);
   }
 }
