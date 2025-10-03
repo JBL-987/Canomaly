@@ -4,6 +4,8 @@ from controllers import ticket_controller
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
+
+
 @router.post("/buy", response_model=TicketResponse)
 def buy_ticket(ticket: TicketCreate):
     return ticket_controller.buy_ticket(ticket)
