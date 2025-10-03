@@ -108,22 +108,30 @@ type InfantPassenger = {
   birthDate: string;
 };
 
+function validateId(value: string, type: "KTP" | "PASPOR") {
+  if (type === "KTP") {
+    if (!/^\d{16}$/.test(value)) return "KTP harus 16 digit angka";
+  } else {
+    if (!/^[A-Z]\d{7,8}$/.test(value)) return "Format Paspor salah";
+  }
+  return "";
+}
+
 function BookingDetails() {
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [adultPassengers, setAdultPassengers] = useState<AdultPassenger[]>([]);
   const [infantPassengers, setInfantPassengers] = useState<InfantPassenger[]>(
     []
   );
-
-  // state buat station id
   const [departureStationId, setDepartureStationId] = useState<number | null>(
     null
   );
   const [destinationStationId, setDestinationStationId] = useState<
     number | null
   >(null);
-
   const [userId, setUserId] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -135,11 +143,9 @@ function BookingDetails() {
       const params = new URLSearchParams(window.location.search);
       const departureTrainStr = params.get("departureTrain");
       const returnTrainStr = params.get("returnTrain");
-
       const departureTrainStation = params.get("origin");
       const destinationTrainStation = params.get("destination");
 
-      // query supabase buat dapet ID station
       if (departureTrainStation) {
         const { data } = await supabase
           .from("stations")
@@ -162,9 +168,7 @@ function BookingDetails() {
       params.delete("returnTrain");
 
       const searchData: any = {};
-      for (const [key, value] of params.entries()) {
-        searchData[key] = value;
-      }
+      for (const [key, value] of params.entries()) searchData[key] = value;
 
       try {
         const departureTrain = departureTrainStr
@@ -172,16 +176,10 @@ function BookingDetails() {
           : null;
         const returnTrain = returnTrainStr ? JSON.parse(returnTrainStr) : null;
 
-        if (!departureTrain) {
-          console.error("Data kereta keberangkatan tidak ditemukan di URL.");
-          return;
-        }
+        if (!departureTrain)
+          return console.error("Data kereta keberangkatan tidak ditemukan.");
 
-        setBookingDetails({
-          searchData,
-          departureTrain,
-          returnTrain,
-        });
+        setBookingDetails({ searchData, departureTrain, returnTrain });
 
         const adultsCount = parseInt(searchData.adults || "1");
         const infantsCount = parseInt(searchData.infants || "0");
@@ -231,6 +229,9 @@ function BookingDetails() {
         return;
       }
 
+      setLoading(true);
+      setSuccess(false);
+
       const payload = {
         transaction_id: uuidv4(),
         user_id: userId || "669f08bf-6134-e352-9ac6-1c2e6930b3d0",
@@ -251,39 +252,60 @@ function BookingDetails() {
         seat_number: adultPassengers.map((_, i) => `Seat-${i + 1}`),
       };
 
-      console.log("Payload:", payload);
+      const response = await fetch("http://127.0.0.1:8000/tickets/buy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      const response = await fetch(
-        // "https://postthoracic-crutched-shakia.ngrok-free.dev/tickets/buy",
-        "http://127.0.0.1:8000/tickets/buy",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
-      }
 
       const data = await response.json();
       console.log("Booking response:", data);
+      setSuccess(true);
       alert("Booking berhasil!");
     } catch (error) {
       console.error("Gagal melakukan booking:", error);
       alert("Booking gagal. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-muted relative">
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <svg
+              className="animate-spin h-10 w-10 text-primary mb-4"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
+            <p className="text-lg font-semibold text-gray-700">Loading...</p>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Form kiri */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Contact Details Form */}
+          {/* Contact Details */}
           <InfoCard title="Detail Kontak" icon={User}>
             <p className="text-xs text-muted-foreground -mt-2">
               Detail Kontak (untuk E-tiket/Voucher)
@@ -327,7 +349,7 @@ function BookingDetails() {
             </div>
           </InfoCard>
 
-          {/* Traveler Details Form */}
+          {/* Passenger Details */}
           <InfoCard title="Detail Penumpang" icon={Users}>
             {adultPassengers.map((adult, idx) => (
               <div
@@ -337,7 +359,6 @@ function BookingDetails() {
                 <p className="text-sm font-bold text-foreground">
                   Dewasa {idx + 1}
                 </p>
-
                 <div>
                   <label className="text-sm font-medium text-foreground">
                     Gelar*
@@ -356,7 +377,6 @@ function BookingDetails() {
                     <option>Nn.</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="text-sm font-medium text-foreground">
                     Nama Lengkap*
@@ -373,7 +393,6 @@ function BookingDetails() {
                     }}
                   />
                 </div>
-
                 <div>
                   <label className="text-sm font-medium text-foreground">
                     Tipe ID*
@@ -395,7 +414,6 @@ function BookingDetails() {
                     <option value="PASPOR">PASPOR</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="text-sm font-medium text-foreground">
                     {adult.idType}*
@@ -427,54 +445,10 @@ function BookingDetails() {
                 </div>
               </div>
             ))}
-
-            {infantPassengers.map((infant, idx) => (
-              <div
-                key={`infant-${idx}`}
-                className="space-y-4 mb-6 border-b last:border-b-0 border-border pb-4 last:pb-0"
-              >
-                <p className="text-sm font-bold text-foreground">
-                  Bayi {idx + 1}
-                </p>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground">
-                    Nama Lengkap*
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Sesuai akta lahir"
-                    className="mt-1 w-full p-2 border border-input rounded-md bg-background"
-                    value={infant.name}
-                    onChange={(e) => {
-                      const newInfants = [...infantPassengers];
-                      newInfants[idx].name = e.target.value;
-                      setInfantPassengers(newInfants);
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground">
-                    Tanggal Lahir*
-                  </label>
-                  <input
-                    type="date"
-                    className="mt-1 w-full p-2 border border-input rounded-md bg-background"
-                    value={infant.birthDate}
-                    onChange={(e) => {
-                      const newInfants = [...infantPassengers];
-                      newInfants[idx].birthDate = e.target.value;
-                      setInfantPassengers(newInfants);
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
           </InfoCard>
         </div>
 
-        {/* Ringkasan kanan */}
+        {/* Summary Right */}
         <div className="lg:col-span-1 space-y-8 sticky top-8">
           <InfoCard title="Rencana Perjalanan Anda" icon={Ticket}>
             <TripDetailCard
@@ -489,7 +463,7 @@ function BookingDetails() {
                 date={searchData.returnDate}
                 origin={searchData.destination}
                 destination={searchData.origin}
-                isReturn={true}
+                isReturn
               />
             )}
           </InfoCard>
@@ -510,9 +484,15 @@ function BookingDetails() {
             <button
               className="w-full mt-6 bg-primary text-primary-foreground font-bold py-3 px-5 rounded-lg text-lg hover:bg-primary/90 transition-colors shadow-lg"
               onClick={handleSubmit}
+              disabled={loading}
             >
               Beli
             </button>
+            {success && (
+              <p className="mt-2 text-green-600 font-medium">
+                Booking berhasil!
+              </p>
+            )}
           </InfoCard>
         </div>
       </main>

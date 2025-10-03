@@ -1,5 +1,4 @@
 import Navbar from "@/components/navbar";
-import { ThemeProvider } from "next-themes";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 
@@ -22,15 +21,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
-        </ThemeProvider>
+        <Navbar />
+        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
       </body>
     </html>
   );
