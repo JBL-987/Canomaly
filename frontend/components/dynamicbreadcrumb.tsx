@@ -20,6 +20,8 @@ const steps: { href: string; label: string }[] = [
 
 export default function DynamicBreadcrumb() {
   const pathname = usePathname() ?? "/";
+  if (pathname?.startsWith("/")) return null;
+
   const currentIndex = steps.findIndex(
     (s) => pathname === s.href || pathname.startsWith(s.href + "/")
   );
@@ -30,7 +32,6 @@ export default function DynamicBreadcrumb() {
         {steps.map((step, i) => {
           const isFuture = i > currentIndex;
           const isActive = i === currentIndex;
-          const isPast = i < currentIndex;
 
           return (
             <React.Fragment key={step.href}>

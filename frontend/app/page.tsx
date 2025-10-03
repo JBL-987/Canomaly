@@ -1,6 +1,5 @@
 "use client";
 
-import { TrainBookingForm } from "@/components/train-booking-form";
 import dynamic from "next/dynamic";
 
 // Dynamically import VantaBg to prevent SSR errors
@@ -14,7 +13,7 @@ export default function Home() {
 
       {/* Main content */}
       <main className="relative z-10 container mx-auto max-w-4xl mt-8">
-        <TrainBookingForm />
+        this is landing page
       </main>
     </div>
   );
