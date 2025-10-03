@@ -7,6 +7,7 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   Train,
 } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +24,11 @@ const navItems = [
     title: "Anomaly Detection",
     href: "/admin/anomaly",
     icon: AlertTriangle,
+  },
+  {
+    title: "AI Chat",
+    href: "/admin/chat",
+    icon: MessageCircle,
   },
   {
     title: "Tickets Log",

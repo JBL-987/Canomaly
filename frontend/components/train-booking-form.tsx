@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Swal from "sweetalert2";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -51,7 +52,6 @@ export function TrainBookingForm() {
   const [stationList, setStationList] = useState<object[]>([]);
   // const [stationIDList, setStationIDList] = useState<string[]>([]);
   const [isLoadingStations, setIsLoadingStations] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -94,17 +94,22 @@ export function TrainBookingForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!formData.origin || !formData.destination || !formData.departure) {
-      setError(
-        "Harap lengkapi stasiun asal, tujuan, dan tanggal keberangkatan."
-      );
+      Swal.fire({
+        icon: 'error',
+        title: 'Input Error',
+        text: "Harap lengkapi stasiun asal, tujuan, dan tanggal keberangkatan.",
+      });
       return;
     }
 
     if (formData.origin === formData.destination) {
-      setError("Stasiun asal dan tujuan tidak boleh sama.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Input',
+        text: "Stasiun asal dan tujuan tidak boleh sama.",
+      });
       return;
     }
 
@@ -507,9 +512,6 @@ export function TrainBookingForm() {
               </div>
             </div>
           </div>
-          {error && (
-            <p className="text-sm text-center text-red-500 pt-2">{error}</p>
-          )}
 
           <Button
             type="submit"
