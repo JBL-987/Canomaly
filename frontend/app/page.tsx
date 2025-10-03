@@ -453,8 +453,4 @@ function LiveUIDemo() {
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 7db7dfaeba9b129c6676f731ee1e198460b906ea
