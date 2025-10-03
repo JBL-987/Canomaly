@@ -17,7 +17,7 @@ type Anomaly = {
   status: "active" | "investigating" | "resolved";
   detected_at: string;
   affected_tickets: number;
-  confidence: number;
+  confidence: number; // numeric value 0-100
 };
 
 export default function AnomalyDetectionPage() {
@@ -47,10 +47,10 @@ export default function AnomalyDetectionPage() {
           description: "Automatically flagged by anomaly detection system",
           severity:
             row.anomaly_score > 0.8
-              ? "high"
+              ? "High"
               : row.anomaly_score > 0.5
-              ? "medium"
-              : "low",
+              ? "Medium"
+              : "Low",
           status:
             (row.review_status as "active" | "investigating" | "resolved") ||
             "active",
@@ -65,9 +65,7 @@ export default function AnomalyDetectionPage() {
             hour12: false,
           }).format(new Date(row.created_at)),
           affected_tickets: row.num_tickets ?? 0,
-          confidence: row.anomaly_score
-            ? Math.round(row.anomaly_score * 100)
-            : 0,
+          confidence: row.anomaly_score ? Math.round(row.anomaly_score) : 0,
         }));
 
         setAnomalies(mapped);

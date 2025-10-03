@@ -254,7 +254,8 @@ function BookingDetails() {
       console.log("Payload:", payload);
 
       const response = await fetch(
-        "https://postthoracic-crutched-shakia.ngrok-free.dev/tickets/buy",
+        // "https://postthoracic-crutched-shakia.ngrok-free.dev/tickets/buy",
+        "http://127.0.0.1:8000/tickets/buy",
         {
           method: "POST",
           headers: {
