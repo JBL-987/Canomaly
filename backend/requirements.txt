@@ -1,9 +1,11 @@
-fastapi 
-uvicorn 
-pydantic[email] 
-python-multipart 
-sqlalchemy 
+fastapi
+uvicorn
+pydantic[email]
+python-multipart
+sqlalchemy
 alembic
 supabase
+python-dotenv
+numpy
 joblib
-pickle
+scikit-learn
