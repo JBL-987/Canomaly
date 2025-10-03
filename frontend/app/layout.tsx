@@ -1,32 +1,26 @@
-import type { Metadata } from "next";
+import Navbar from "@/components/navbar";
 import { ThemeProvider } from "next-themes";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "",
-  description: "",
-};
-
-// ✅ Montserrat instead of Geist
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
   display: "swap",
 });
 
+export const metadata = {
+  title: "Canomaly",
+  description: "Your train booking app",
+};
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={`${montserrat.className} antialiased`}>
         <ThemeProvider
           attribute="class"
@@ -34,7 +28,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Navbar />
+          <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
         </ThemeProvider>
       </body>
     </html>

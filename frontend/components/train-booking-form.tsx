@@ -1,6 +1,3 @@
-"use client";
-import type React from "react";
-
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,37 +17,20 @@ import {
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
   CalendarIcon,
   Check,
   ChevronsUpDown,
+  Loader2,
   Minus,
   Plus,
   Train,
 } from "lucide-react";
+import type React from "react";
 import { useEffect, useState } from "react";
-
-const KAI_STATIONS = [
-  "Jakarta Gambir",
-  "Jakarta Pasar Senen",
-  "Bandung",
-  "Yogyakarta",
-  "Solo Balapan",
-  "Surabaya Gubeng",
-  "Surabaya Pasar Turi",
-  "Semarang Tawang",
-  "Malang",
-  "Cirebon",
-];
-
-const WHOOSH_STATIONS = [
-  "Halim (Jakarta)",
-  "Karawang",
-  "Padalarang",
-  "Bandung (Tegalluar)",
-];
 
 export function TrainBookingForm() {
   const [trainOperator, setTrainOperator] = useState<"kai" | "whoosh">("kai");
@@ -66,45 +46,70 @@ export function TrainBookingForm() {
     infants: 0,
   });
 
+  const [stationList, setStationList] = useState<string[]>([]);
+  const [isLoadingStations, setIsLoadingStations] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchAllStations() {
+      setIsLoadingStations(true);
+      const { data, error } = await supabase.from("stations").select("name");
+      if (error) {
+        console.error("Error fetching stations:", error);
+      } else if (data) {
+        const stationNames = data.map((station) => station.name);
+        setStationList(stationNames);
+      }
+      setIsLoadingStations(false);
+    }
+    fetchAllStations();
+  }, [supabase]);
+
   useEffect(() => {
     if (tripType === "one-way") {
       setFormData((prev) => ({ ...prev, return: undefined }));
     }
   }, [tripType]);
 
+  const handleOperatorChange = (operator: "kai" | "whoosh") => {
+    setTrainOperator(operator);
+    setFormData((prev) => ({ ...prev, origin: "", destination: "" }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (!formData.origin || !formData.destination || !formData.departure) {
+      setError(
+        "Harap lengkapi stasiun asal, tujuan, dan tanggal keberangkatan."
+      );
+      return;
+    }
+
+    if (formData.origin === formData.destination) {
+      setError("Stasiun asal dan tujuan tidak boleh sama.");
+      return;
+    }
 
     const params = new URLSearchParams();
-
     params.append("operator", trainOperator);
     params.append("tripType", tripType);
-    if (formData.origin) params.append("origin", formData.origin);
-    if (formData.destination)
-      params.append("destination", formData.destination);
-
-    if (formData.departure) {
-      params.append(
-        "departure",
-        formData.departure.toISOString().split("T")[0]
-      );
-    }
+    params.append("origin", formData.origin);
+    params.append("destination", formData.destination);
+    params.append("departure", formData.departure.toISOString().split("T")[0]);
     if (formData.return && tripType === "round-trip") {
       params.append("return", formData.return.toISOString().split("T")[0]);
     }
-
     params.append("adults", formData.adults.toString());
     params.append("infants", formData.infants.toString());
-
-    // Use standard window location for navigation
-    window.location.href = `/train-list?${params.toString()}`;
+    window.location.href = `/user/train-list?${params.toString()}`;
   };
 
   const incrementPassengers = (type: "adults" | "infants") => {
-    setFormData((prev) => ({
-      ...prev,
-      [type]: prev[type] + 1,
-    }));
+    setFormData((prev) => ({ ...prev, [type]: prev[type] + 1 }));
   };
 
   const decrementPassengers = (type: "adults" | "infants") => {
@@ -114,8 +119,6 @@ export function TrainBookingForm() {
     }));
   };
 
-  const stations = trainOperator === "kai" ? KAI_STATIONS : WHOOSH_STATIONS;
-
   return (
     <Card className="shadow-xl border-2">
       <CardHeader className="space-y-4 pb-6">
@@ -124,21 +127,20 @@ export function TrainBookingForm() {
             <Train className="h-7 w-7 text-primary-foreground" />
           </div>
           <CardTitle className="text-4xl font-bold text-balance text-primary">
-            Trains
+            Kereta Api
           </CardTitle>
         </div>
         <Separator className="bg-border" />
       </CardHeader>
-
       <CardContent className="space-y-6">
         <div className="flex items-center gap-3">
           <Label className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-            Train Operator:
+            Operator Kereta:
           </Label>
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setTrainOperator("kai")}
+              onClick={() => handleOperatorChange("kai")}
               className={cn(
                 "rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all",
                 trainOperator === "kai"
@@ -150,7 +152,7 @@ export function TrainBookingForm() {
             </button>
             <button
               type="button"
-              onClick={() => setTrainOperator("whoosh")}
+              onClick={() => handleOperatorChange("whoosh")}
               className={cn(
                 "rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all",
                 trainOperator === "whoosh"
@@ -165,18 +167,25 @@ export function TrainBookingForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-wrap items-end gap-3">
-            {/* Origin */}
+            {/* Asal */}
             <div className="flex-1 min-w-[160px] space-y-2">
-              <Label className="text-sm font-medium">Origin</Label>
+              <Label className="text-sm font-medium">Asal</Label>
               <Popover open={originOpen} onOpenChange={setOriginOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
-                    aria-expanded={originOpen}
+                    disabled={isLoadingStations}
                     className="h-11 w-full justify-between font-normal bg-transparent"
                   >
-                    {formData.origin || "Search station..."}
+                    {isLoadingStations ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Memuat...
+                      </>
+                    ) : (
+                      formData.origin || "Cari stasiun..."
+                    )}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -186,13 +195,13 @@ export function TrainBookingForm() {
                 >
                   <Command>
                     <CommandInput
-                      placeholder="Search station..."
+                      placeholder="Cari stasiun..."
                       className="h-10"
                     />
                     <CommandList>
-                      <CommandEmpty>No station found.</CommandEmpty>
+                      <CommandEmpty>Stasiun tidak ditemukan.</CommandEmpty>
                       <CommandGroup>
-                        {stations.map((station) => (
+                        {stationList.map((station) => (
                           <CommandItem
                             key={station}
                             value={station}
@@ -223,18 +232,25 @@ export function TrainBookingForm() {
               </Popover>
             </div>
 
-            {/* Destination */}
+            {/* Tujuan */}
             <div className="flex-1 min-w-[160px] space-y-2">
-              <Label className="text-sm font-medium">Destination</Label>
+              <Label className="text-sm font-medium">Tujuan</Label>
               <Popover open={destinationOpen} onOpenChange={setDestinationOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
-                    aria-expanded={destinationOpen}
+                    disabled={isLoadingStations}
                     className="h-11 w-full justify-between font-normal bg-transparent"
                   >
-                    {formData.destination || "Search station..."}
+                    {isLoadingStations ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Memuat...
+                      </>
+                    ) : (
+                      formData.destination || "Cari stasiun..."
+                    )}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -244,13 +260,13 @@ export function TrainBookingForm() {
                 >
                   <Command>
                     <CommandInput
-                      placeholder="Search station..."
+                      placeholder="Cari stasiun..."
                       className="h-10"
                     />
                     <CommandList>
-                      <CommandEmpty>No station found.</CommandEmpty>
+                      <CommandEmpty>Stasiun tidak ditemukan.</CommandEmpty>
                       <CommandGroup>
-                        {stations.map((station) => (
+                        {stationList.map((station) => (
                           <CommandItem
                             key={station}
                             value={station}
@@ -281,9 +297,9 @@ export function TrainBookingForm() {
               </Popover>
             </div>
 
-            {/* Departure */}
+            {/* Keberangkatan */}
             <div className="flex-1 min-w-[160px] space-y-2">
-              <Label className="text-sm font-medium">Departure</Label>
+              <Label className="text-sm font-medium">Keberangkatan</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -297,7 +313,7 @@ export function TrainBookingForm() {
                     {formData.departure ? (
                       format(formData.departure, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Pilih tanggal</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -323,9 +339,9 @@ export function TrainBookingForm() {
               </Popover>
             </div>
 
-            {/* Return */}
+            {/* Kepulangan */}
             <div className="flex-1 min-w-[160px] space-y-2">
-              <Label className="text-sm font-medium">Return</Label>
+              <Label className="text-sm font-medium">Kepulangan</Label>
               <div className="space-y-2">
                 <RadioGroup
                   value={tripType}
@@ -340,7 +356,7 @@ export function TrainBookingForm() {
                       htmlFor="one-way"
                       className="cursor-pointer font-normal text-xs"
                     >
-                      One-way
+                      Sekali Jalan
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -349,18 +365,17 @@ export function TrainBookingForm() {
                       htmlFor="round-trip"
                       className="cursor-pointer font-normal text-xs"
                     >
-                      Round-trip
+                      Pulang Pergi
                     </Label>
                   </div>
                 </RadioGroup>
-
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       disabled={tripType === "one-way"}
                       className={cn(
-                        "h-11 w-full justify-start text-left font-normal",
+                        "h-11 w-full justify-start text-left font-normal flex",
                         tripType === "one-way" &&
                           "opacity-50 cursor-not-allowed",
                         !formData.return && "text-muted-foreground"
@@ -372,13 +387,12 @@ export function TrainBookingForm() {
                       ) : (
                         <span>
                           {tripType === "one-way"
-                            ? "One-way trip"
-                            : "Pick a date"}
+                            ? "Sekali jalan"
+                            : "Pilih tanggal"}
                         </span>
                       )}
                     </Button>
                   </PopoverTrigger>
-
                   <PopoverContent
                     className="w-auto p-0 shadow-xl border-2"
                     align="start"
@@ -404,12 +418,14 @@ export function TrainBookingForm() {
               </div>
             </div>
 
-            {/* Passengers */}
+            {/* Penumpang */}
             <div className="flex-1 min-w-[180px] space-y-2">
-              <Label className="text-sm font-medium">No. of Passengers</Label>
+              <Label className="text-sm font-medium">Jumlah Penumpang</Label>
               <div className="flex gap-2">
                 <div className="flex-1 space-y-1">
-                  <Label className="text-xs text-muted-foreground">Adult</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    Dewasa
+                  </Label>
                   <div className="flex items-center gap-1 h-11 border-2 rounded-lg px-2 bg-background">
                     <Button
                       type="button"
@@ -434,11 +450,8 @@ export function TrainBookingForm() {
                     </Button>
                   </div>
                 </div>
-
                 <div className="flex-1 space-y-1">
-                  <Label className="text-xs text-muted-foreground">
-                    Infant
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">Bayi</Label>
                   <div className="flex items-center gap-1 h-11 border-2 rounded-lg px-2 bg-background">
                     <Button
                       type="button"
@@ -466,13 +479,16 @@ export function TrainBookingForm() {
               </div>
             </div>
           </div>
+          {error && (
+            <p className="text-sm text-center text-red-500 pt-2">{error}</p>
+          )}
 
           <Button
             type="submit"
             size="lg"
             className="w-full h-12 font-semibold text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all"
           >
-            Search Trains
+            Cari Kereta
           </Button>
         </form>
       </CardContent>
