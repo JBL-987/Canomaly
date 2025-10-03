@@ -11,7 +11,7 @@ import {
   Train,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // The nav items remain the same
 const navItems = [
@@ -38,6 +38,10 @@ const navItems = [
 ];
 
 export function SidebarNav() {
+  const router = useRouter();
+  const handleLogout = () => {
+    router.push("/");
+  };
   const pathname = usePathname();
 
   return (
@@ -99,7 +103,10 @@ export function SidebarNav() {
               </div>
             </div>
           </div>
-          <button className="p-2 rounded-md transition-colors hover:bg-muted">
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-md transition-colors hover:bg-muted"
+          >
             <LogOut className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>

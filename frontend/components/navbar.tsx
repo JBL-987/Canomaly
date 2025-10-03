@@ -15,10 +15,12 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      // Animation for a smooth fade-in on page load
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      // Sticky position with glassmorphism effect
-      className="sticky top-0 w-full bg-background/80 backdrop-blur-lg border-b border-border/60 shadow-sm z-50"
+      // ✨ 1. Restored the smooth fade-in animation
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      // ✨ 2. Refined the glassmorphism effect for a cleaner "frosted" look
+      className="sticky top-0 w-full bg-background/95 backdrop-blur-lg border-b border-border/60 shadow-sm z-50"
     >
       <div className="container mx-auto flex items-center justify-between p-4">
         {/* Logo / App Name */}
@@ -26,10 +28,13 @@ export default function Navbar() {
           <Image
             src="/canomaly_logo.svg"
             alt="Canomaly Logo"
-            width={50}
-            height={50}
+            width={40} // Slightly adjusted size for balance
+            height={40}
           />
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-sky-400 bg-clip-text text-transparent">
+          <h1
+            // ✨ 3. Updated gradient to be more professional and theme-consistent
+            className="hidden sm:block text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent"
+          >
             Canomaly
           </h1>
         </Link>
@@ -47,7 +52,11 @@ export default function Navbar() {
             </Button>
           </Link>
           <Link href="/auth/sign-up">
-            <Button size="sm" variant="default" className="shadow-md">
+            <Button
+              size="sm"
+              // ✨ 4. Applied the 'btn-primary-glow' class for an impressive hover effect
+              className="btn-primary-glow"
+            >
               Sign Up
             </Button>
           </Link>
