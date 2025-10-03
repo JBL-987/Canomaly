@@ -8,8 +8,10 @@ import {
   Tag,
   Users,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+// Defines the structure for a single train schedule
 type Train = {
   id: string;
   name: string;
@@ -24,6 +26,7 @@ type Train = {
   departure_date?: string;
 };
 
+// Generates mock train schedule data for demonstration
 const generateFakeSchedules = (
   operator: string,
   origin: string,
@@ -118,6 +121,7 @@ const generateFakeSchedules = (
   return schedules;
 };
 
+// UI component for a single train schedule card
 function TrainCard({
   train,
   origin,
@@ -191,7 +195,9 @@ function TrainCard({
   );
 }
 
+// Main logic component for fetching, displaying, and handling selections
 function SearchResults() {
+  const router = useRouter();
   const [searchData, setSearchData] = useState<any>(null);
   const [selectedDeparture, setSelectedDeparture] = useState<Train | null>(
     null
@@ -261,7 +267,7 @@ function SearchResults() {
       params.append("returnTrain", JSON.stringify(selectedReturn));
     }
 
-    window.location.href = `/user/your-booking?${params.toString()}`;
+    router.push(`/user/your-booking?${params.toString()}`);
   };
 
   if (!searchData) {
@@ -304,7 +310,6 @@ function SearchResults() {
           </div>
         </div>
 
-        {/* Bagian Hasil */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center text-center p-10">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -315,7 +320,6 @@ function SearchResults() {
           </div>
         ) : (
           <>
-            {/* Hasil Keberangkatan */}
             <section>
               <h2 className="text-2xl font-bold mb-4 text-foreground">
                 Hasil Keberangkatan
@@ -342,7 +346,6 @@ function SearchResults() {
               )}
             </section>
 
-            {/* Hasil Kepulangan */}
             {searchData.tripType === "round-trip" && searchData.returnDate && (
               <section className="mt-12">
                 <div className="flex items-center justify-between mb-4">
@@ -413,6 +416,7 @@ function SearchResults() {
   );
 }
 
+// Default export for the page, wrapping the main component in Suspense
 export default function TrainListPage() {
   return (
     <Suspense

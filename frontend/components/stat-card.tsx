@@ -28,7 +28,7 @@ export function StatCard({
               <p
                 className={cn(
                   "text-sm font-medium",
-                  changeType === "positive" && "text-chart-4",
+                  changeType === "positive" && "text-green-600",
                   changeType === "negative" && "text-destructive",
                   changeType === "neutral" && "text-muted-foreground"
                 )}
