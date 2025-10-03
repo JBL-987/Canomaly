@@ -28,16 +28,51 @@ export default function AnomalyDetectionPage() {
   useEffect(() => {
     async function fetchAnomalies() {
       setLoading(true);
+
       const { data, error } = await supabase
         .from("transactions")
-        .select("*")
+        .select(
+          "id, anomaly_score, num_tickets, fraud_flag, review_status, created_at"
+        )
         .eq("fraud_flag", true);
 
       if (error) {
         console.error("Error fetching anomalies:", error.message);
-      } else {
-        setAnomalies(data || []);
+      } else if (data) {
+        const mapped: Anomaly[] = data.map((row: any) => ({
+          id: row.id,
+          title: row.anomaly_label_id
+            ? `Label ${row.anomaly_label_id}`
+            : "Unlabeled",
+          description: "Automatically flagged by anomaly detection system",
+          severity:
+            row.anomaly_score > 0.8
+              ? "high"
+              : row.anomaly_score > 0.5
+              ? "medium"
+              : "low",
+          status:
+            (row.review_status as "active" | "investigating" | "resolved") ||
+            "active",
+          detected_at: new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Asia/Bangkok",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }).format(new Date(row.created_at)),
+          affected_tickets: row.num_tickets ?? 0,
+          confidence: row.anomaly_score
+            ? Math.round(row.anomaly_score * 100)
+            : 0,
+        }));
+
+        setAnomalies(mapped);
       }
+
       setLoading(false);
     }
 
@@ -129,8 +164,14 @@ export default function AnomalyDetectionPage() {
 
         {/* Anomalies Table */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between">
             <CardTitle>Detected Anomalies</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Total anomalies:{" "}
+              <span className="font-semibold text-foreground">
+                {anomalies.length}
+              </span>
+            </p>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -138,15 +179,14 @@ export default function AnomalyDetectionPage() {
             ) : anomalies.length === 0 ? (
               <p className="text-muted-foreground">No anomalies detected.</p>
             ) : (
-              <table className="w-full border-collapse">
+              <table className="w-full border-collapse text-center">
                 <thead>
-                  <tr className="border-b border-border text-left text-sm text-muted-foreground">
+                  <tr className="border-b border-border text-sm text-muted-foreground">
                     <th className="p-2">TransactionID</th>
-                    <th className="p-2">Severity</th>
-                    <th className="p-2">Status</th>
                     <th className="p-2">Detected At</th>
                     <th className="p-2">Affected Tickets</th>
-                    <th className="p-2">Confidence (%)</th>
+                    <th className="p-2">Severity & Confidence</th>
+                    <th className="p-2">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -155,8 +195,20 @@ export default function AnomalyDetectionPage() {
                       key={anomaly.id}
                       className="border-b border-border hover:bg-accent/5 transition-colors"
                     >
+                      {/* Transaction ID */}
                       <td className="p-2">{anomaly.id}</td>
-                      <td className="p-2">{anomaly.title}</td>
+
+                      {/* Detected At */}
+                      <td className="p-2 text-sm text-muted-foreground">
+                        {anomaly.detected_at}
+                      </td>
+
+                      {/* Affected Tickets */}
+                      <td className="p-2 text-sm text-muted-foreground">
+                        {anomaly.affected_tickets}
+                      </td>
+
+                      {/* Severity + Confidence */}
                       <td className="p-2">
                         <Badge
                           variant="outline"
@@ -169,9 +221,11 @@ export default function AnomalyDetectionPage() {
                               "border-chart-4 text-chart-4"
                           )}
                         >
-                          {anomaly.severity}
+                          {anomaly.severity} ({anomaly.confidence}%)
                         </Badge>
                       </td>
+
+                      {/* Status */}
                       <td className="p-2">
                         <Badge
                           className={cn(
@@ -194,15 +248,6 @@ export default function AnomalyDetectionPage() {
                           )}
                           {anomaly.status}
                         </Badge>
-                      </td>
-                      <td className="p-2 text-sm text-muted-foreground">
-                        {anomaly.detected_at}
-                      </td>
-                      <td className="p-2 text-sm text-muted-foreground">
-                        {anomaly.affected_tickets}
-                      </td>
-                      <td className="p-2 text-sm text-muted-foreground">
-                        {anomaly.confidence}
                       </td>
                     </tr>
                   ))}
