@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@/lib/supabase/client";
 import {
   ArrowRight,
   Clock,
@@ -9,8 +10,10 @@ import {
   Users,
 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-// --- Helper Components ---
+const supabase = createClient();
+
 function InfoCard({
   title,
   children,
@@ -112,60 +115,99 @@ function BookingDetails() {
     []
   );
 
+  // state buat station id
+  const [departureStationId, setDepartureStationId] = useState<number | null>(
+    null
+  );
+  const [destinationStationId, setDestinationStationId] = useState<
+    number | null
+  >(null);
+
+  const [userId, setUserId] = useState<string>("");
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    async function init() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user?.id) setUserId(user.id);
 
-    const departureTrainStr = params.get("departureTrain");
-    const returnTrainStr = params.get("returnTrain");
+      const params = new URLSearchParams(window.location.search);
+      const departureTrainStr = params.get("departureTrain");
+      const returnTrainStr = params.get("returnTrain");
 
-    params.delete("departureTrain");
-    params.delete("returnTrain");
+      const departureTrainStation = params.get("origin");
+      const destinationTrainStation = params.get("destination");
 
-    const searchData: any = {};
-    for (const [key, value] of params.entries()) {
-      searchData[key] = value;
-    }
-
-    try {
-      const departureTrain = departureTrainStr
-        ? JSON.parse(departureTrainStr)
-        : null;
-      const returnTrain = returnTrainStr ? JSON.parse(returnTrainStr) : null;
-
-      if (!departureTrain) {
-        console.error("Data kereta keberangkatan tidak ditemukan di URL.");
-        return;
+      // query supabase buat dapet ID station
+      if (departureTrainStation) {
+        const { data } = await supabase
+          .from("stations")
+          .select("id")
+          .eq("name", departureTrainStation)
+          .maybeSingle();
+        if (data) setDepartureStationId(data.id);
       }
 
-      setBookingDetails({
-        searchData,
-        departureTrain,
-        returnTrain,
-      });
+      if (destinationTrainStation) {
+        const { data } = await supabase
+          .from("stations")
+          .select("id")
+          .eq("name", destinationTrainStation)
+          .maybeSingle();
+        if (data) setDestinationStationId(data.id);
+      }
 
-      // Initialize passengers
-      const adultsCount = parseInt(searchData.adults || "1");
-      const infantsCount = parseInt(searchData.infants || "0");
+      params.delete("departureTrain");
+      params.delete("returnTrain");
 
-      setAdultPassengers(
-        Array.from({ length: adultsCount }).map(() => ({
-          title: "Tn.",
-          name: "",
-          idType: "KTP" as const,
-          idValue: "",
-          error: "",
-        }))
-      );
+      const searchData: any = {};
+      for (const [key, value] of params.entries()) {
+        searchData[key] = value;
+      }
 
-      setInfantPassengers(
-        Array.from({ length: infantsCount }).map(() => ({
-          name: "",
-          birthDate: "",
-        }))
-      );
-    } catch (e) {
-      console.error("Gagal mengurai data kereta dari URL:", e);
+      try {
+        const departureTrain = departureTrainStr
+          ? JSON.parse(departureTrainStr)
+          : null;
+        const returnTrain = returnTrainStr ? JSON.parse(returnTrainStr) : null;
+
+        if (!departureTrain) {
+          console.error("Data kereta keberangkatan tidak ditemukan di URL.");
+          return;
+        }
+
+        setBookingDetails({
+          searchData,
+          departureTrain,
+          returnTrain,
+        });
+
+        const adultsCount = parseInt(searchData.adults || "1");
+        const infantsCount = parseInt(searchData.infants || "0");
+
+        setAdultPassengers(
+          Array.from({ length: adultsCount }).map(() => ({
+            title: "Tn.",
+            name: "",
+            idType: "KTP" as const,
+            idValue: "",
+            error: "",
+          }))
+        );
+
+        setInfantPassengers(
+          Array.from({ length: infantsCount }).map(() => ({
+            name: "",
+            birthDate: "",
+          }))
+        );
+      } catch (e) {
+        console.error("Gagal mengurai data kereta dari URL:", e);
+      }
     }
+
+    init();
   }, []);
 
   if (!bookingDetails) {
@@ -182,19 +224,63 @@ function BookingDetails() {
   const totalPrice =
     (departurePrice + returnPrice) * parseInt(searchData.adults || "0");
 
-  const validateId = (value: string, type: string) => {
-    if (type === "KTP") {
-      const nikRegex = /^\d{16}$/;
-      return nikRegex.test(value) ? "" : "Format NIK harus 16 digit angka";
-    } else {
-      const passportRegex = /^[A-Z0-9]{6,9}$/;
-      return passportRegex.test(value) ? "" : "Format paspor tidak valid";
+  async function handleSubmit() {
+    try {
+      if (!departureStationId || !destinationStationId) {
+        alert("ID stasiun belum siap, coba beberapa detik lagi.");
+        return;
+      }
+
+      const payload = {
+        transaction_id: uuidv4(),
+        user_id: userId || "669f08bf-6134-e352-9ac6-1c2e6930b3d0",
+        price: totalPrice,
+        num_tickets: parseInt(searchData.adults || "1"),
+        ticket_class_id: departureTrain?.class_id || 1,
+        discount_amount: 0,
+        station_from_id: departureStationId,
+        station_to_id: destinationStationId,
+        payment_method_id: 2,
+        booking_channel_id: 1,
+        is_refund: 0,
+        transaction_time: new Date().toISOString(),
+        is_popular_route: 1,
+        price_category: 0,
+        tickets_category: 0,
+        passenger_name: adultPassengers.map((p) => p.name),
+        seat_number: adultPassengers.map((_, i) => `Seat-${i + 1}`),
+      };
+
+      console.log("Payload:", payload);
+
+      const response = await fetch(
+        "https://postthoracic-crutched-shakia.ngrok-free.dev/tickets/buy",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Booking response:", data);
+      alert("Booking berhasil!");
+    } catch (error) {
+      console.error("Gagal melakukan booking:", error);
+      alert("Booking gagal. Silakan coba lagi.");
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-muted">
       <main className="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Form kiri */}
         <div className="lg:col-span-2 space-y-8">
           {/* Contact Details Form */}
           <InfoCard title="Detail Kontak" icon={User}>
@@ -387,6 +473,7 @@ function BookingDetails() {
           </InfoCard>
         </div>
 
+        {/* Ringkasan kanan */}
         <div className="lg:col-span-1 space-y-8 sticky top-8">
           <InfoCard title="Rencana Perjalanan Anda" icon={Ticket}>
             <TripDetailCard
@@ -407,51 +494,22 @@ function BookingDetails() {
           </InfoCard>
 
           <InfoCard title="Ringkasan Harga" icon={CreditCard}>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Tiket Keberangkatan
-                </span>
-                <span>
-                  {new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                    minimumFractionDigits: 0,
-                  }).format(departurePrice)}
-                </span>
-              </div>
-              {returnTrain && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tiket Pulang</span>
-                  <span>
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                    }).format(returnPrice)}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Penumpang Dewasa</span>
-                <span>x {searchData.adults}</span>
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-card-foreground">
+                Total Harga
+              </span>
+              <span className="text-2xl font-extrabold text-primary">
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                }).format(totalPrice)}
+              </span>
             </div>
-            <div className="border-t border-border mt-4 pt-4">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-card-foreground">
-                  Total Harga
-                </span>
-                <span className="text-2xl font-extrabold text-primary">
-                  {new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                    minimumFractionDigits: 0,
-                  }).format(totalPrice)}
-                </span>
-              </div>
-            </div>
-            <button className="w-full mt-6 bg-primary text-primary-foreground font-bold py-3 px-5 rounded-lg text-lg hover:bg-primary/90 transition-colors shadow-lg">
+            <button
+              className="w-full mt-6 bg-primary text-primary-foreground font-bold py-3 px-5 rounded-lg text-lg hover:bg-primary/90 transition-colors shadow-lg"
+              onClick={handleSubmit}
+            >
               Beli
             </button>
           </InfoCard>

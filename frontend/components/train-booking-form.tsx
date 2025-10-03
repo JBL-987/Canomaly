@@ -40,13 +40,16 @@ export function TrainBookingForm() {
   const [formData, setFormData] = useState({
     origin: "",
     destination: "",
+    originId: "0",
+    destinationId: "0",
     departure: undefined as Date | undefined,
     return: undefined as Date | undefined,
     adults: 1,
     infants: 0,
   });
 
-  const [stationList, setStationList] = useState<string[]>([]);
+  const [stationList, setStationList] = useState<object[]>([]);
+  // const [stationIDList, setStationIDList] = useState<string[]>([]);
   const [isLoadingStations, setIsLoadingStations] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,12 +58,23 @@ export function TrainBookingForm() {
   useEffect(() => {
     async function fetchAllStations() {
       setIsLoadingStations(true);
-      const { data, error } = await supabase.from("stations").select("name");
+      const { data, error } = await supabase
+        .from("stations")
+        .select("id, name");
       if (error) {
         console.error("Error fetching stations:", error);
       } else if (data) {
-        const stationNames = data.map((station) => station.name);
-        setStationList(stationNames);
+        console.log(data);
+        const stations = data.map((station) => {
+          return {
+            name: station.name,
+            id: station.id,
+          };
+        });
+        // const stationNames = data.map((station) => station.name);
+        // const stationIds = data.map((station) => station.id);
+        setStationList(stations);
+        // setStationIDList(stationIds);
       }
       setIsLoadingStations(false);
     }
@@ -98,7 +112,9 @@ export function TrainBookingForm() {
     params.append("operator", trainOperator);
     params.append("tripType", tripType);
     params.append("origin", formData.origin);
+    params.append("origin_id", formData.originId);
     params.append("destination", formData.destination);
+    params.append("destination_id", formData.destinationId);
     params.append("departure", formData.departure.toISOString().split("T")[0]);
     if (formData.return && tripType === "round-trip") {
       params.append("return", formData.return.toISOString().split("T")[0]);
@@ -203,13 +219,19 @@ export function TrainBookingForm() {
                       <CommandGroup>
                         {stationList.map((station) => (
                           <CommandItem
-                            key={station}
-                            value={station}
-                            onSelect={(currentValue) => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                origin: currentValue,
-                              }));
+                            key={station.id}
+                            value={station.id.toString()}
+                            onSelect={(id) => {
+                              const selectedStation = stationList.find(
+                                (s) => s.id.toString() === id
+                              );
+                              if (selectedStation) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  origin: selectedStation.name,
+                                  originId: selectedStation.id.toString(),
+                                }));
+                              }
                               setOriginOpen(false);
                             }}
                             className="cursor-pointer"
@@ -217,12 +239,12 @@ export function TrainBookingForm() {
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                formData.origin === station
+                                formData.originId === station.id.toString()
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
                             />
-                            {station}
+                            {station.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -268,13 +290,19 @@ export function TrainBookingForm() {
                       <CommandGroup>
                         {stationList.map((station) => (
                           <CommandItem
-                            key={station}
-                            value={station}
-                            onSelect={(currentValue) => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                destination: currentValue,
-                              }));
+                            key={station.id}
+                            value={station.id.toString()}
+                            onSelect={(id) => {
+                              const selectedStation = stationList.find(
+                                (s) => s.id.toString() === id
+                              );
+                              if (selectedStation) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  destination: selectedStation.name,
+                                  destinationId: selectedStation.id.toString(),
+                                }));
+                              }
                               setDestinationOpen(false);
                             }}
                             className="cursor-pointer"
@@ -282,12 +310,12 @@ export function TrainBookingForm() {
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                formData.destination === station
+                                formData.destinationId === station.id.toString()
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
                             />
-                            {station}
+                            {station.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>

@@ -280,7 +280,7 @@ function SearchResults() {
       : selectedDeparture;
 
   return (
-    <div className="min-h-screen bg-muted pb-32">
+    <div className="min-h-screen pb-32">
       <main className="container mx-auto p-4 md:p-8">
         <div className="bg-card p-5 rounded-xl shadow-md border border-border mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-card-foreground">
