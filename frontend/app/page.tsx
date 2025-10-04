@@ -92,7 +92,7 @@ export default function LandingPage() {
                 asChild
               >
                 <Link href="/user/homepage">
-                  Buy Ticket <Ticket className="ml-2 h-4 w-4" />
+                   Buy Ticket Simulation <Ticket className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
