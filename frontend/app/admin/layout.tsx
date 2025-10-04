@@ -12,14 +12,14 @@ export const metadata: Metadata = {
   description: "Admin dashboard for monitoring train ticket anomalies",
 };
 
-export default function RootLayout({
+export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+    <div lang="en">
+      <div className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <div className="flex h-screen">
           <Suspense fallback={<div>Loading...</div>}>
             <SidebarNav />
@@ -27,7 +27,7 @@ export default function RootLayout({
           <div className="flex-1 overflow-hidden">{children}</div>
         </div>
         <Analytics />
-      </body>
-    </html>
+      </div>
+    </div>
   );
 }

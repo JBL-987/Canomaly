@@ -236,7 +236,9 @@ function BookingDetails() {
         transaction_id: uuidv4(),
         user_id: userId || "669f08bf-6134-e352-9ac6-1c2e6930b3d0",
         price: totalPrice,
-        num_tickets: parseInt(searchData.adults || "1"),
+        num_tickets:
+          parseInt(searchData.adults || "1") +
+          parseInt(searchData.infants || "0"),
         ticket_class_id: departureTrain?.class_id || 1,
         discount_amount: 0,
         station_from_id: departureStationId,
