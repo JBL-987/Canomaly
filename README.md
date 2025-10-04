@@ -89,9 +89,10 @@ venv\Scripts\activate
 pip install -r requirements.txt
 
 # Start FastAPI server
-python main.py        # Start FastAPI server
-python -m pytest      # Run tests
-python build_kb.py    # Rebuild knowledge base
+uvicorn main:app --reload
+
+#Building Knowledge Base for RAG
+python  build_knowledge_base.py    
 ```
 
 
