@@ -27,7 +27,7 @@ Sistem monitoring kecerdasan buatan untuk deteksi anomali pembelian tiket kereta
 ## 🏗️ Tech Stack
 
 ### Frontend
-- **Next.js 14** - React framework dengan App Router
+- **Next.js 15** - React framework dengan App Router
 - **TypeScript** - Type safety dan developer experience
 - **Tailwind CSS** - Utility-first CSS framework
 - **Framer Motion** - Animasi smooth dan modern
