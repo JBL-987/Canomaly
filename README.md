@@ -73,15 +73,15 @@ pip install -r requirements.txt
 #### Environment Variables
 Create `backend/.env` file:
 ```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_anon_key
-GEMINI_API_KEY=your_google_gemini_api_key
+SUPABASE_URL="https://oydqkrkacoddymqwzzyv.supabase.co"
+SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95ZHFrcmthY29kZHltcXd6enl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzOTAyMzMsImV4cCI6MjA3NDk2NjIzM30.FMlDk8_QmLQAVKYCJIVS5ityo_9NvNA-NTfy2QR_6Gw"
+GEMINI_API_KEY="AIzaSyBbtnZy5OvRjrWsdWmd6OoLrvhlvdwjjuw"
 ```
 
 Create `frontend/.env.local` file:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL="https://oydqkrkacoddymqwzzyv.supabase.co"
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95ZHFrcmthY29kZHltcXd6enl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzOTAyMzMsImV4cCI6MjA3NDk2NjIzM30.FMlDk8_QmLQAVKYCJIVS5ityo_9NvNA-NTfy2QR_6Gw"
 ```
 
 #### Setup Database
