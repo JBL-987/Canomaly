@@ -67,6 +67,7 @@ cd Canomaly
 ### Frontend
 ```bash
 cd frontend
+npm install
 npm run dev          # Start development server
 npm run build        # Build for production
 npm run type-check   # TypeScript type checking
