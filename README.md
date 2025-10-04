@@ -62,13 +62,37 @@ git clone https://github.com/JBL-987/Canomaly.git
 cd Canomaly
 ```
 
-### 2. Setup Backend (FastAPI)
+## 🔧 Development Commands
 
-#### Install Dependencies
+### Frontend
+```bash
+cd frontend
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run type-check   # TypeScript type checking
+npm run lint         # ESLint checking
+```
+
+### Backend
 ```bash
 cd backend
+
+# Setup virtual environment (optional tapi recommended)
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+# source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Start FastAPI server
+python main.py        # Start FastAPI server
+python -m pytest      # Run tests
+python build_kb.py    # Rebuild knowledge base
 ```
+
 
 #### Environment Variables
 Create `backend/.env` file:
@@ -161,37 +185,6 @@ Canomaly/
 │   ├── schema/           # Database schemas
 │   └── services/         # ML services
 └── README.md/            # Project documentation
-```
-
-## 🔧 Development Commands
-
-### Frontend
-```bash
-cd frontend
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run type-check   # TypeScript type checking
-npm run lint         # ESLint checking
-```
-
-### Backend
-```bash
-cd backend
-
-# Setup virtual environment (optional tapi recommended)
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-# source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start FastAPI server
-python main.py        # Start FastAPI server
-python -m pytest      # Run tests
-python build_kb.py    # Rebuild knowledge base
 ```
 
 ## 🔍 Key Features Explained
