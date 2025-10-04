@@ -2,22 +2,14 @@
 
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-=======
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
+import Confetti from "react-confetti";
+
 
 type Anomaly = {
   id: string;
@@ -28,23 +20,17 @@ type Anomaly = {
   detected_at: string;
   affected_tickets: number;
   confidence: number;
-<<<<<<< HEAD
-  // ✨ ADDED: Price property to the type definition
-=======
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
   final_price: number;
 };
 
 export default function AnomalyDetectionPage() {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
+  const [hebohAnomaly, setHebohAnomaly] = useState<Anomaly | null>(null);
   const supabase = createClient();
-=======
-  const [flashAnomaly, setFlashAnomaly] = useState<Anomaly | null>(null);
   const supabase = createClient();
   const lastIdsRef = useRef<Set<string>>(new Set());
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
+
 
   useEffect(() => {
     async function fetchAnomalies() {
@@ -58,13 +44,7 @@ export default function AnomalyDetectionPage() {
         .eq("fraud_flag", true)
         .order("created_at", { ascending: false });
 
-<<<<<<< HEAD
-      if (error) {
-        console.error("Error fetching anomalies:", error.message);
-      } else if (data) {
-=======
       if (!error && data) {
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         const mapped: Anomaly[] = data.map((row: any) => ({
           id: row.id,
           title: row.anomaly_label_id
@@ -84,12 +64,6 @@ export default function AnomalyDetectionPage() {
             timeZone: "Asia/Jakarta",
           }),
           affected_tickets: row.num_tickets ?? 0,
-<<<<<<< HEAD
-          confidence: row.anomaly_score ? Math.round(row.anomaly_score) : 0,
-          final_price: row.total_amount ?? 0,
-        }));
-
-=======
           confidence: row.anomaly_score
             ? Math.round(row.anomaly_score * 100)
             : 0,
@@ -97,7 +71,6 @@ export default function AnomalyDetectionPage() {
         }));
 
         lastIdsRef.current = new Set(mapped.map((a) => a.id));
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         setAnomalies(mapped);
       }
 
@@ -105,10 +78,6 @@ export default function AnomalyDetectionPage() {
     }
 
     fetchAnomalies();
-<<<<<<< HEAD
-  }, [supabase]);
-
-=======
 
     const channel = supabase
       .channel("anomalies-realtime")
@@ -150,9 +119,7 @@ export default function AnomalyDetectionPage() {
 
           if (!lastIdsRef.current.has(anomaly.id)) {
             lastIdsRef.current.add(anomaly.id);
-            notifyAnomaly(anomaly);
-            setFlashAnomaly(anomaly);
-            setTimeout(() => setFlashAnomaly(null), 3000); // Flash for 3 seconds
+            triggerHeboh(anomaly);
           }
         }
       )
@@ -161,10 +128,13 @@ export default function AnomalyDetectionPage() {
     return () => supabase.removeChannel(channel);
   }, [supabase]);
 
-  const notifyAnomaly = (anomaly: Anomaly) => {
+  const triggerHeboh = (anomaly: Anomaly) => {
+    // Show full-screen modal
+    setHebohAnomaly(anomaly);
+
     // Browser notification
     if (Notification.permission === "granted") {
-      new Notification("🚨 NEW ANOMALY DETECTED!", {
+      new Notification("🚨 ANOMALY DETECTED!", {
         body: `${anomaly.title} (${anomaly.severity})`,
         icon: "/alert-icon.png",
       });
@@ -172,32 +142,16 @@ export default function AnomalyDetectionPage() {
       Notification.requestPermission();
     }
 
-    // Loud alert sound
-    const audio = new Audio("/alert-sound.mp3");
-    audio.volume = 1.0;
-    audio.play();
-
-    // Flash page title
-    let flash = 0;
-    const originalTitle = document.title;
-    const interval = setInterval(() => {
-      document.title = flash % 2 === 0 ? "🚨 NEW ANOMALY!" : originalTitle;
-      flash++;
-      if (flash > 5) {
-        clearInterval(interval);
-        document.title = originalTitle;
-      }
-    }, 500);
+    // Auto hide modal after 5s
+    setTimeout(() => setHebohAnomaly(null), 8000);
   };
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
   const activeCount = anomalies.filter((a) => a.status === "active").length;
   const investigatingCount = anomalies.filter(
     (a) => a.status === "investigating"
   ).length;
   const resolvedCount = anomalies.filter((a) => a.status === "resolved").length;
 
-<<<<<<< HEAD
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
@@ -213,12 +167,6 @@ export default function AnomalyDetectionPage() {
       <Header />
       <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
         {/* Header and Stats Cards (No changes here) */}
-=======
-  return (
-    <div className="flex flex-col h-screen bg-background relative">
-      <Header />
-      <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
@@ -228,7 +176,6 @@ export default function AnomalyDetectionPage() {
               Real-time monitoring and analysis of ticket anomalies
             </p>
           </div>
-<<<<<<< HEAD
           <div className="flex gap-2">
             <Button variant="outline">
               <Clock className="mr-2 h-4 w-4" />
@@ -240,11 +187,33 @@ export default function AnomalyDetectionPage() {
             </Button>
           </div>
         </div>
-=======
-        </div>
 
+      {/* HEBOH MODAL */}
+      <AnimatePresence>
+        {hebohAnomaly && (
+          <>
+            <Confetti />
+            <motion.div
+              key={hebohAnomaly.id}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1.1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-red-600/90 text-white p-8 text-center"
+            >
+              <h1 className="text-4xl font-extrabold animate-pulse">
+                🚨 CALO DETECTED!! 🚨
+              </h1>
+              <p className="mt-4 text-2xl font-bold">
+                {hebohAnomaly.title} ({hebohAnomaly.severity})
+              </p>
+              <p className="mt-2 text-lg">{hebohAnomaly.description}</p>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
         {/* Stats Cards */}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="shadow-sm">
             <CardContent className="p-6 flex items-center gap-4">
@@ -293,13 +262,8 @@ export default function AnomalyDetectionPage() {
           </Card>
         </div>
 
-<<<<<<< HEAD
-        {/* Anomalies Log Table */}
-        <Card className="shadow-sm">
-=======
         {/* Anomalies Table */}
         <Card className="shadow-sm relative">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
           <CardHeader>
             <CardTitle>Detected Anomalies Log</CardTitle>
           </CardHeader>
@@ -313,9 +277,6 @@ export default function AnomalyDetectionPage() {
                 No anomalies detected.
               </p>
             ) : (
-<<<<<<< HEAD
-              <div className="overflow-x-auto">
-=======
               <div className="overflow-x-auto relative">
                 <AnimatePresence>
                   {flashAnomaly && (
@@ -335,38 +296,21 @@ export default function AnomalyDetectionPage() {
                   )}
                 </AnimatePresence>
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-muted-foreground">
                       <th className="p-4 text-left font-medium">Transaction</th>
                       <th className="p-4 text-left font-medium">Detected At</th>
                       <th className="p-4 text-center font-medium">Tickets</th>
-<<<<<<< HEAD
-                      {/* ✨ ADDED: Price column header */}
-=======
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                       <th className="p-4 text-right font-medium">Price</th>
                       <th className="p-4 text-center font-medium">Severity</th>
                       <th className="p-4 text-center font-medium">Status</th>
                     </tr>
                   </thead>
-<<<<<<< HEAD
-                  <motion.tbody
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    {anomalies.map((anomaly) => (
-                      <motion.tr
-                        key={anomaly.id}
-                        variants={itemVariants}
-=======
                   <tbody>
                     {anomalies.map((anomaly) => (
                       <tr
                         key={anomaly.id}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                         className="border-b transition-colors hover:bg-muted/30"
                       >
                         <td className="p-4 text-left">
@@ -383,10 +327,6 @@ export default function AnomalyDetectionPage() {
                         <td className="p-4 text-center font-medium text-foreground">
                           {anomaly.affected_tickets}
                         </td>
-<<<<<<< HEAD
-                        {/* ✨ ADDED: Price column data, formatted as IDR */}
-=======
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                         <td className="p-4 text-right font-medium text-foreground">
                           {new Intl.NumberFormat("id-ID", {
                             style: "currency",
@@ -434,15 +374,9 @@ export default function AnomalyDetectionPage() {
                             {anomaly.status}
                           </Badge>
                         </td>
-<<<<<<< HEAD
-                      </motion.tr>
-                    ))}
-                  </motion.tbody>
-=======
                       </tr>
                     ))}
                   </tbody>
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                 </table>
               </div>
             )}
@@ -451,8 +385,4 @@ export default function AnomalyDetectionPage() {
       </main>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
