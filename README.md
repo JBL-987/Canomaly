@@ -74,6 +74,8 @@ npm run type-check   # TypeScript type checking
 npm run lint         # ESLint checking
 ```
 
+Frontend akan berjalan di `http://localhost:3000`
+
 ### Backend
 ```bash
 cd backend
@@ -94,7 +96,7 @@ uvicorn main:app --reload
 #Building Knowledge Base for RAG
 python  build_knowledge_base.py    
 ```
-
+Backend akan berjalan di `http://localhost:8000`
 
 #### Environment Variables
 Create `backend/.env` file:
@@ -115,45 +117,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC
 2. Jalankan SQL migrations dari `backend/schema/`
 3. Setup authentication dan RLS policies
 
-#### Build Knowledge Base
-```bash
-cd backend
-python ai_agents/build_knowledge_base.py
-```
-
-#### Run Backend
-```bash
-cd backend
-python main.py
-```
-
-Backend akan berjalan di `http://localhost:8000`
-
-### 3. Setup Frontend (Next.js)
-
-#### Install Dependencies
-```bash
-cd frontend
-npm install
-# atau
-pnpm install
-```
-
-#### Setup Authentication
-1. Konfigurasi authentication providers di Supabase Dashboard
-2. Setup redirect URLs untuk OAuth
-
-#### Run Frontend (Development)
-```bash
-cd frontend
-npm run dev
-# atau
-pnpm dev
-```
-
-Frontend akan berjalan di `http://localhost:3000`
-
-### 4. Setup AI Assistant
+### Setup AI Assistant
 
 #### Gemini API Setup
 1. Kunjungi [Google AI Studio](https://makersuite.google.com/app/apikey)
