@@ -10,6 +10,7 @@ import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 
+
 type Anomaly = {
   id: string;
   title: string;
@@ -27,7 +28,9 @@ export default function AnomalyDetectionPage() {
   const [loading, setLoading] = useState(true);
   const [hebohAnomaly, setHebohAnomaly] = useState<Anomaly | null>(null);
   const supabase = createClient();
+  const supabase = createClient();
   const lastIdsRef = useRef<Set<string>>(new Set());
+
 
   useEffect(() => {
     async function fetchAnomalies() {
@@ -61,7 +64,9 @@ export default function AnomalyDetectionPage() {
             timeZone: "Asia/Jakarta",
           }),
           affected_tickets: row.num_tickets ?? 0,
-          confidence: row.anomaly_score ? Math.round(row.anomaly_score) : 0,
+          confidence: row.anomaly_score
+            ? Math.round(row.anomaly_score * 100)
+            : 0,
           final_price: row.total_amount ?? 0,
         }));
 
@@ -147,9 +152,41 @@ export default function AnomalyDetectionPage() {
   ).length;
   const resolvedCount = anomalies.filter((a) => a.status === "resolved").length;
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-background relative">
+    <div className="flex flex-col h-screen bg-background">
       <Header />
+      <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
+        {/* Header and Stats Cards (No changes here) */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Anomaly Detection
+            </h1>
+            <p className="text-muted-foreground">
+              Real-time monitoring and analysis of ticket anomalies
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <Clock className="mr-2 h-4 w-4" />
+              Last 24 Hours
+            </Button>
+            <Button>
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Run Analysis
+            </Button>
+          </div>
+        </div>
 
       {/* HEBOH MODAL */}
       <AnimatePresence>
@@ -241,6 +278,24 @@ export default function AnomalyDetectionPage() {
               </p>
             ) : (
               <div className="overflow-x-auto relative">
+                <AnimatePresence>
+                  {flashAnomaly && (
+                    <motion.div
+                      key={flashAnomaly.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{
+                        opacity: 1,
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      exit={{ opacity: 0 }}
+                      className="absolute top-0 left-1/2 -translate-x-1/2 bg-red-500/30 rounded-lg p-4 z-50 shadow-xl text-white font-bold text-lg"
+                    >
+                      🚨 NEW ANOMALY: {flashAnomaly.title} 🚨
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-muted-foreground">

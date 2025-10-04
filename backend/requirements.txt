@@ -8,5 +8,5 @@ supabase
 python-dotenv
 numpy
 joblib
-scikit-learn
+pickle
 google-generativeai
