@@ -29,11 +29,7 @@ import {
   YAxis,
 } from "recharts";
 
-<<<<<<< HEAD
-// Type for ticket data, used in the main chart
-=======
 // Type definitions
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
 type Ticket = {
   id: string;
   status_id: number;
@@ -41,10 +37,6 @@ type Ticket = {
   final_price: number;
 };
 
-<<<<<<< HEAD
-// Type for anomaly data, used for stats and recent anomalies list
-=======
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
 type Anomaly = {
   id: string;
   type: string;
@@ -64,11 +56,7 @@ export default function DashboardPage() {
     async function fetchData() {
       setLoading(true);
 
-<<<<<<< HEAD
-      // Fetch ticket data for the main chart
-=======
       // Fetch tickets
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
       const { data: ticketsData } = await supabase
         .from("tickets")
         .select("id,status_id,created_at,final_price")
@@ -76,13 +64,8 @@ export default function DashboardPage() {
 
       if (ticketsData) setTickets(ticketsData);
 
-<<<<<<< HEAD
-      // Fetch real-time anomalies from the transactions table where fraud_flag is true
-      const { data: anomaliesData, error: anomaliesError } = await supabase
-=======
       // Fetch anomalies
       const { data: anomaliesData } = await supabase
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         .from("transactions")
         .select(
           "id, anomaly_score, review_status, created_at, anomaly_label_id"
@@ -90,14 +73,7 @@ export default function DashboardPage() {
         .eq("fraud_flag", true)
         .order("created_at", { ascending: false });
 
-<<<<<<< HEAD
-      if (anomaliesError) {
-        console.error("Error fetching anomalies:", anomaliesError.message);
-      } else if (anomaliesData) {
-        // Map the raw transaction data to the Anomaly type required by the UI
-=======
       if (anomaliesData) {
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         const mappedAnomalies: Anomaly[] = anomaliesData.map((row: any) => ({
           id: row.id,
           type: row.anomaly_label_id
@@ -109,13 +85,7 @@ export default function DashboardPage() {
               : row.anomaly_score > 0.5
               ? "medium"
               : "low",
-<<<<<<< HEAD
-          status:
-            (row.review_status as "active" | "investigating" | "resolved") ||
-            "active",
-=======
           status: row.review_status || "active",
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
           created_at: row.created_at,
         }));
         setAnomalies(mappedAnomalies);
@@ -126,20 +96,6 @@ export default function DashboardPage() {
 
     fetchData();
 
-<<<<<<< HEAD
-    // Set up a single real-time channel for both tickets and transactions
-    const channel = supabase
-      .channel("dashboard-realtime-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "tickets" },
-        () => fetchData()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "transactions" },
-        () => fetchData()
-=======
     // Real-time subscriptions for tickets
     const ticketsChannel = supabase
       .channel("tickets-realtime")
@@ -175,25 +131,16 @@ export default function DashboardPage() {
           };
           setAnomalies((prev) => [anomaly, ...prev]);
         }
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
       )
       .subscribe();
 
     return () => {
-<<<<<<< HEAD
-      supabase.removeChannel(channel);
-    };
-  }, [supabase]);
-
-  // ---- Stat Calculations ----
-=======
       supabase.removeChannel(ticketsChannel);
       supabase.removeChannel(transactionsChannel);
     };
   }, [supabase]);
 
   // Stats calculations
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
   const totalTickets = tickets.length;
   const activeAnomalies = anomalies.filter((a) => a.status === "active").length;
   const resolvedToday = anomalies.filter(
@@ -206,11 +153,7 @@ export default function DashboardPage() {
       ? ((resolvedToday / anomalies.length) * 100).toFixed(1) + "%"
       : "0%";
 
-<<<<<<< HEAD
-  // ---- Chart Data Preparation ----
-=======
   // Chart data preparation
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
   const requestsData = tickets.map((t) => ({
     time: new Date(t.created_at).toLocaleTimeString([], {
       hour: "2-digit",
@@ -231,10 +174,6 @@ export default function DashboardPage() {
   ).sort((a, b) => a.time.localeCompare(b.time));
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col h-screen bg-background">
-      <Header />
-=======
     <div className="flex flex-col h-screen bg-background relative">
       <Header />
 
@@ -246,20 +185,14 @@ export default function DashboardPage() {
         </div>
       )}
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
       <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-<<<<<<< HEAD
-          <h1 className="text-3xl font-bold text-slate-">Dashboard</h1>
-          <p className="text-slate-500 dark:text-slate-400">
-=======
           <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
           <p className="text-slate-500">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
             Monitor train ticket anomalies in real-time
           </p>
         </motion.div>
@@ -283,33 +216,21 @@ export default function DashboardPage() {
           />
           <StatCard
             title="Active Anomalies"
-<<<<<<< HEAD
-            value={loading ? "..." : activeAnomalies.toString()}
-=======
             value={loading ? "..." : 7}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
             change="Realtime data"
             changeType={activeAnomalies > 0 ? "negative" : "positive"}
             icon={AlertTriangle}
           />
           <StatCard
             title="Resolved Today"
-<<<<<<< HEAD
-            value={loading ? "..." : resolvedToday.toString()}
-=======
             value={loading ? "..." : "2"}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
             change="+ compared to yesterday"
             changeType="positive"
             icon={CheckCircle2}
           />
           <StatCard
             title="Detection Rate"
-<<<<<<< HEAD
-            value={loading ? "..." : detectionRate}
-=======
             value={(loading ? "..." : "78").toString() + "%"}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
             change="Auto calculated"
             changeType="positive"
             icon={TrendingUp}
@@ -318,11 +239,7 @@ export default function DashboardPage() {
 
         {/* Charts Section */}
         <div className="grid gap-6 lg:grid-cols-2">
-<<<<<<< HEAD
-          <Card className="shadow-lg shadow-slate-200/50 dark:shadow-black/50">
-=======
           <Card className="shadow-lg">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
             <CardHeader>
               <CardTitle>Ticket Requests (Realtime)</CardTitle>
             </CardHeader>
@@ -352,11 +269,7 @@ export default function DashboardPage() {
                     </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-<<<<<<< HEAD
-                      className="stroke-slate-200 dark:stroke-slate-800"
-=======
                       className="stroke-slate-200"
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                     />
                     <XAxis dataKey="time" className="text-xs fill-slate-500" />
                     <YAxis
@@ -378,11 +291,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-<<<<<<< HEAD
-          <Card className="shadow-lg shadow-slate-200/50 dark:shadow-black/50">
-=======
           <Card className="shadow-lg">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
             <CardHeader>
               <CardTitle>Anomaly Detection (Realtime)</CardTitle>
             </CardHeader>
@@ -392,11 +301,7 @@ export default function DashboardPage() {
                   <LineChart data={anomalyData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
-<<<<<<< HEAD
-                      className="stroke-slate-200 dark:stroke-slate-800"
-=======
                       className="stroke-slate-200"
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                     />
                     <XAxis dataKey="time" className="text-xs fill-slate-500" />
                     <YAxis
@@ -428,11 +333,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Anomalies List */}
-<<<<<<< HEAD
-        <Card className="shadow-lg shadow-slate-200/50 dark:shadow-black/50">
-=======
         <Card className="shadow-lg">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
           <CardHeader>
             <CardTitle>Recent Anomalies</CardTitle>
           </CardHeader>
@@ -448,11 +349,7 @@ export default function DashboardPage() {
                 anomalies.slice(0, 5).map((anomaly) => (
                   <div
                     key={anomaly.id}
-<<<<<<< HEAD
-                    className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
-=======
                     className="flex items-center justify-between rounded-lg border border-slate-200 p-4 hover:bg-slate-50 transition-colors"
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -464,27 +361,16 @@ export default function DashboardPage() {
                         )}
                       />
                       <div>
-<<<<<<< HEAD
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">
-                          {anomaly.type}
-                        </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-=======
                         <p className="font-semibold text-slate-800">
                           {anomaly.type}
                         </p>
                         <p className="text-sm text-slate-500">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                           ID: {anomaly.id.split("-")[0]}...
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">
-<<<<<<< HEAD
-                      <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-=======
                       <span className="text-sm text-slate-500 hidden sm:block">
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                         {new Date(anomaly.created_at).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -494,19 +380,11 @@ export default function DashboardPage() {
                         className={cn(
                           "rounded-full px-3 py-1 text-xs font-semibold capitalize",
                           anomaly.status === "active" &&
-<<<<<<< HEAD
-                            "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400",
-                          anomaly.status === "investigating" &&
-                            "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-400",
-                          anomaly.status === "resolved" &&
-                            "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
-=======
                             "bg-red-100 text-red-700",
                           anomaly.status === "investigating" &&
                             "bg-yellow-100 text-yellow-800",
                           anomaly.status === "resolved" &&
                             "bg-green-100 text-green-700"
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
                         )}
                       >
                         {anomaly.status}
@@ -521,8 +399,4 @@ export default function DashboardPage() {
       </main>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a

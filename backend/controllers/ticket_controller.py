@@ -32,11 +32,7 @@ def parse_datetime(value) -> datetime:
             return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
         except Exception:
             raise ValueError(f"Invalid datetime format: {value}")
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
 def ensure_uuid(user_id: str) -> str:
     """
     Convert any string into a valid UUID string.
@@ -58,74 +54,6 @@ def calculate_ticket_features(ticket: TicketCreate) -> dict:
     # Get ticket class info
     ticket_class_id = getattr(ticket, 'ticket_class_id', 1)
     class_info = TICKET_CLASSES.get(ticket_class_id, TICKET_CLASSES[1])
-<<<<<<< HEAD
-    
-    final_price = float(ticket.price)
-    base_price = class_info['base']
-    max_price = class_info['max']
-    discount_amount = float(getattr(ticket, 'discount_amount', 0))
-    
-    # Calculate derived features
-    price_markup_ratio = final_price / base_price if base_price > 0 else 0
-    discount_ratio = discount_amount / base_price if base_price > 0 else 0
-    is_price_above_max = 1 if final_price > max_price else 0
-    
-    return {
-        'final_price': final_price,
-        'base_price': base_price,
-        'discount_amount': discount_amount,
-        'price_markup_ratio': price_markup_ratio,
-        'num_tickets': ticket.num_tickets,
-        'ticket_class_id': ticket_class_id,
-        'station_from_id': ticket.station_from_id,
-        'station_to_id': ticket.station_to_id,
-        'payment_method_id': ticket.payment_method_id,
-        'booking_channel_id': ticket.booking_channel_id,
-        'is_refund': int(ticket.is_refund),
-        'is_popular_route': int(ticket.is_popular_route),
-        'is_price_above_max': is_price_above_max,
-        'discount_ratio': discount_ratio
-    }
-
-
-def validate_ticket_price(ticket_class_id: int, final_price: float) -> dict:
-    """
-    Validasi harga tiket berdasarkan kelas.
-    """
-    if ticket_class_id not in TICKET_CLASSES:
-        return {
-            'is_valid': False,
-            'is_suspicious': True,
-            'message': 'Invalid ticket class',
-            'price_deviation': 0,
-            'expected_range': 'N/A',
-            'class_name': 'Unknown'
-        }
-    
-    class_info = TICKET_CLASSES[ticket_class_id]
-    min_price = class_info['min']
-    max_price = class_info['max']
-    max_allowed = max_price * 1.1  # 10% tolerance
-    
-    is_valid = min_price <= final_price <= max_allowed
-    is_suspicious = final_price > (max_price * 1.5)
-    
-    if final_price < min_price:
-        deviation = ((min_price - final_price) / min_price) * -100
-    elif final_price > max_price:
-        deviation = ((final_price - max_price) / max_price) * 100
-    else:
-        deviation = 0
-    
-    return {
-        'is_valid': is_valid,
-        'is_suspicious': is_suspicious,
-        'price_deviation': round(deviation, 2),
-        'expected_range': f"Rp {min_price:,.0f} - Rp {max_price:,.0f}",
-        'class_name': class_info['name']
-    }
-
-=======
 
     final_price = float(ticket.price)
     base_price = class_info['base']
@@ -192,7 +120,6 @@ def validate_ticket_price(ticket_class_id: int, final_price: float) -> dict:
         'class_name': class_info['name']
     }
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
 # ---------------- Core Functions ---------------- #
 
 def buy_ticket(ticket: TicketCreate) -> dict:
@@ -202,17 +129,6 @@ def buy_ticket(ticket: TicketCreate) -> dict:
     """
     # Calculate features untuk model
     ticket_features = calculate_ticket_features(ticket)
-<<<<<<< HEAD
-    
-    # Prediksi anomaly / scalper
-    result = api_detector.predict(ticket_features)
-    pred_label = -1 if result['prediction'] == 'anomaly' else 1
-    score = result['score'] * -100 
-    risk_score = result.get('risk_score', 0)
-    risk_level = result.get('risk_level', 'Low')
-    is_scalper = result.get('is_scalper', False)
-    
-=======
 
     # Prediksi anomaly / scalper
     result = api_detector.predict(ticket_features)
@@ -222,7 +138,6 @@ def buy_ticket(ticket: TicketCreate) -> dict:
     risk_level = result.get('risk_level', 'Low')
     is_scalper = result.get('is_scalper', False)
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
     # Validasi harga berdasarkan ticket class
     ticket_class_id = getattr(ticket, 'ticket_class_id', 1)
     price_validation = validate_ticket_price(ticket_class_id, float(ticket.price))
@@ -244,10 +159,7 @@ def buy_ticket(ticket: TicketCreate) -> dict:
         "payment_method_id": ticket.payment_method_id,
         "booking_channel_id": ticket.booking_channel_id,
         "status_id": 1,
-<<<<<<< HEAD
-=======
         "num_tickets": ticket.num_tickets,
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         "device_fingerprint": ticket.device_id,
         "ip_address": ticket.ip_id or generate_dummy_ip(),
         "is_refund": int(ticket.is_refund),
@@ -256,34 +168,8 @@ def buy_ticket(ticket: TicketCreate) -> dict:
         "fraud_flag": int(is_scalper),
     }
     trx = transaction_model.create_transaction(trx_data)
-    trx_id = trx.data[0]["id"]
-
     # Insert ke tickets table (per penumpang/seat)
-    seat_numbers = ticket.seat_number or []
     passenger_names = ticket.passenger_name if isinstance(ticket.passenger_name, list) else [ticket.passenger_name]
-<<<<<<< HEAD
-    
-    base_price = ticket_features['base_price']
-    discount = ticket_features['discount_amount']
-    
-    for idx, seat in enumerate(seat_numbers):
-        ticket_price = float(ticket.price / ticket.num_tickets)
-        
-        ticket_model.create_ticket({
-            "transaction_id": str(trx_id),
-            "passenger_name": passenger_names[idx] if idx < len(passenger_names) else f"Passenger {idx+1}",
-            "seat_number": seat,
-            "price": ticket_price,
-            "ticket_class_id": ticket_class_id,
-            "base_price": base_price,
-            "discount_amount": discount / ticket.num_tickets if discount > 0 else 0,
-            "final_price": ticket_price,
-            "status_id": 1,
-            "station_from_id": ticket.station_from_id,
-            "station_to_id": ticket.station_to_id,
-        })
-
-=======
 
     base_price = ticket_features['base_price']
     discount = ticket_features['discount_amount']
@@ -305,7 +191,6 @@ def buy_ticket(ticket: TicketCreate) -> dict:
             "station_to_id": ticket.station_to_id,
         })
 
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
     # Build response
     t_time = parse_datetime(ticket.transaction_time)
     hour = t_time.hour
@@ -342,22 +227,12 @@ def buy_ticket(ticket: TicketCreate) -> dict:
         "seat_number": seat_numbers,
         "id": str(uuid.uuid4()),
         "created_at": datetime.utcnow().isoformat(),
-<<<<<<< HEAD
-        
-=======
-
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         # Model prediction results
         "prediction": result['prediction'],
         "score": float(score),
         "risk_score": risk_score,
         "risk_level": risk_level,
         "is_scalper": is_scalper,
-<<<<<<< HEAD
-        
-=======
-
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         # Price validation results
         "price_validation": {
             "is_valid": price_validation['is_valid'],
@@ -366,11 +241,6 @@ def buy_ticket(ticket: TicketCreate) -> dict:
             "expected_range": price_validation['expected_range'],
             "class_name": price_validation['class_name']
         },
-<<<<<<< HEAD
-        
-=======
-
->>>>>>> 181ad786d3ed78c96f0f356ae1666e6e494bb63a
         # Additional model features
         "model_features": {
             "price_markup_ratio": round(ticket_features['price_markup_ratio'], 2),

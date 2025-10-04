@@ -55,22 +55,33 @@ def get_realtime_stats():
     except:
         return ""
 
+def clean_formatting(text: str):
+    """Bersihkan formatting seperti **bold** dari text"""
+    import re
+    # Hapus **bold** markers
+    text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
+    # Hapus *italic* markers
+    text = re.sub(r'\*([^*]+)\*', r'\1', text)
+    # Hapus markdown headers
+    text = re.sub(r'^#+\s*', '', text, flags=re.MULTILINE)
+    return text.strip()
+
 def ask(question: str):
     """Tanya AI dengan RAG untuk monitoring anomaly"""
     print(f"\n🔍 Mencari informasi relevan...")
-    
+
     # 1. Cari dokumen yang relevan dari knowledge base
     docs = search_documents(question, top_k=5)
-    
+
     if not docs:
         return "Maaf, saya tidak menemukan informasi yang relevan dalam knowledge base. Pastikan knowledge base sudah di-build dengan menjalankan build_anomaly_knowledge.py terlebih dahulu."
-    
+
     # 2. Buat context dari dokumen
     context = "\n\n".join([f"- {doc['content']}" for doc in docs])
-    
+
     # 3. Ambil stats real-time jika diperlukan
     realtime_stats = get_realtime_stats()
-    
+
     # 4. Generate jawaban dengan prompt yang di-optimize untuk monitoring anomaly
     prompt = f"""Kamu adalah AI Assistant untuk sistem monitoring anomaly pembelian tiket kereta api.
 Tugas kamu adalah membantu admin memahami dan memonitor transaksi yang terdeteksi anomali atau fraud.
@@ -90,14 +101,17 @@ INSTRUKSI:
 5. Jika ada indikator fraud/scalper, jelaskan dengan detail
 6. Gunakan emoji yang relevan untuk membuat response lebih engaging (🚨 untuk critical, ⚠️ untuk warning, ✅ untuk normal, dll)
 7. Jika konteks tidak cukup untuk jawab, akui keterbatasan tapi berikan guidance umum
-8. FORMAT CLEAN: JANGAN gunakan tanda bintang (*) untuk formatting. Gunakan paragraf biasa tanpa bullet points atau list apapun. Pastikan response mudah dibaca dan profesional.
+8. FORMAT CLEAN - SANGAT PENTING: JANGAN PERNAH gunakan tanda bintang (*) ATAU tanda bintang ganda (**) untuk formatting apa pun. JANGAN gunakan markdown. Gunakan paragraf biasa tanpa bullet points, tanpa bold, tanpa italic, tanpa list. Pastikan response mudah dibaca dan profesional - hanya teks biasa tanpa formatting khusus.
 
 JAWABAN:"""
-    
+
     print(f"💭 Memproses jawaban...")
     response = model.generate_content(prompt)
-    
-    return response.text
+
+    # 5. Bersihkan formatting dari response
+    clean_response = clean_formatting(response.text)
+
+    return clean_response
 
 def show_welcome():
     """Tampilkan welcome message"""

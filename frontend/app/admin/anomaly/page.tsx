@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ type Anomaly = {
   id: string;
   title: string;
   description: string;
-  severity: "low" | "medium" | "high";
+  severity: "Low" | "Medium" | "High";
   status: "active" | "investigating" | "resolved";
   detected_at: string;
   affected_tickets: number;
@@ -27,7 +28,6 @@ export default function AnomalyDetectionPage() {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [loading, setLoading] = useState(true);
   const [hebohAnomaly, setHebohAnomaly] = useState<Anomaly | null>(null);
-  const supabase = createClient();
   const supabase = createClient();
   const lastIdsRef = useRef<Set<string>>(new Set());
 
@@ -65,7 +65,7 @@ export default function AnomalyDetectionPage() {
           }),
           affected_tickets: row.num_tickets ?? 0,
           confidence: row.anomaly_score
-            ? Math.round(row.anomaly_score * 100)
+            ? Math.round(row.anomaly_score)
             : 0,
           final_price: row.total_amount ?? 0,
         }));
@@ -152,16 +152,6 @@ export default function AnomalyDetectionPage() {
   ).length;
   const resolvedCount = anomalies.filter((a) => a.status === "resolved").length;
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <div className="flex flex-col h-screen bg-background">
       <Header />
@@ -188,31 +178,6 @@ export default function AnomalyDetectionPage() {
           </div>
         </div>
 
-      {/* HEBOH MODAL */}
-      <AnimatePresence>
-        {hebohAnomaly && (
-          <>
-            <Confetti />
-            <motion.div
-              key={hebohAnomaly.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1.1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-red-600/90 text-white p-8 text-center"
-            >
-              <h1 className="text-4xl font-extrabold animate-pulse">
-                🚨 CALO DETECTED!! 🚨
-              </h1>
-              <p className="mt-4 text-2xl font-bold">
-                {hebohAnomaly.title} ({hebohAnomaly.severity})
-              </p>
-              <p className="mt-2 text-lg">{hebohAnomaly.description}</p>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="shadow-sm">
@@ -278,24 +243,6 @@ export default function AnomalyDetectionPage() {
               </p>
             ) : (
               <div className="overflow-x-auto relative">
-                <AnimatePresence>
-                  {flashAnomaly && (
-                    <motion.div
-                      key={flashAnomaly.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{
-                        opacity: 1,
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      exit={{ opacity: 0 }}
-                      className="absolute top-0 left-1/2 -translate-x-1/2 bg-red-500/30 rounded-lg p-4 z-50 shadow-xl text-white font-bold text-lg"
-                    >
-                      🚨 NEW ANOMALY: {flashAnomaly.title} 🚨
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-muted-foreground">
@@ -383,6 +330,30 @@ export default function AnomalyDetectionPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* HEBOH MODAL */}
+      <AnimatePresence>
+        {hebohAnomaly && (
+          <>
+            <Confetti />
+            <motion.div
+              key={hebohAnomaly.id}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1.1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-red-600/90 text-white p-8 text-center"
+            >
+              <h1 className="text-4xl font-extrabold animate-pulse">
+                🚨 CALO DETECTED!! 🚨
+              </h1>
+              <p className="mt-4 text-2xl font-bold">
+                {hebohAnomaly.title} ({hebohAnomaly.severity})
+              </p>
+              <p className="mt-2 text-lg">{hebohAnomaly.description}</p>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -103,7 +103,7 @@ export default function ChatPage() {
             <div>
               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
                 <MessageCircle className="h-8 w-8" />
-                AI Assistant
+                Admin Assistant
               </h1>
               <p className="text-muted-foreground">
                 Bantu admin dalam monitoring dan analisa anomaly transaksi tiket
@@ -119,7 +119,7 @@ export default function ChatPage() {
             <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                Chat dengan AI Assistant
+                Chat dengan Admin Assistant
               </CardTitle>
             </CardHeader>
 
