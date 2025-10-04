@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import Confetti from "react-confetti";
 
 type Anomaly = {
   id: string;
@@ -24,7 +25,7 @@ type Anomaly = {
 export default function AnomalyDetectionPage() {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [loading, setLoading] = useState(true);
-  const [flashAnomaly, setFlashAnomaly] = useState<Anomaly | null>(null);
+  const [hebohAnomaly, setHebohAnomaly] = useState<Anomaly | null>(null);
   const supabase = createClient();
   const lastIdsRef = useRef<Set<string>>(new Set());
 
@@ -60,9 +61,7 @@ export default function AnomalyDetectionPage() {
             timeZone: "Asia/Jakarta",
           }),
           affected_tickets: row.num_tickets ?? 0,
-          confidence: row.anomaly_score
-            ? Math.round(row.anomaly_score * 100)
-            : 0,
+          confidence: row.anomaly_score ? Math.round(row.anomaly_score) : 0,
           final_price: row.total_amount ?? 0,
         }));
 
@@ -115,9 +114,7 @@ export default function AnomalyDetectionPage() {
 
           if (!lastIdsRef.current.has(anomaly.id)) {
             lastIdsRef.current.add(anomaly.id);
-            notifyAnomaly(anomaly);
-            setFlashAnomaly(anomaly);
-            setTimeout(() => setFlashAnomaly(null), 3000); // Flash for 3 seconds
+            triggerHeboh(anomaly);
           }
         }
       )
@@ -126,10 +123,13 @@ export default function AnomalyDetectionPage() {
     return () => supabase.removeChannel(channel);
   }, [supabase]);
 
-  const notifyAnomaly = (anomaly: Anomaly) => {
+  const triggerHeboh = (anomaly: Anomaly) => {
+    // Show full-screen modal
+    setHebohAnomaly(anomaly);
+
     // Browser notification
     if (Notification.permission === "granted") {
-      new Notification("🚨 NEW ANOMALY DETECTED!", {
+      new Notification("🚨 ANOMALY DETECTED!", {
         body: `${anomaly.title} (${anomaly.severity})`,
         icon: "/alert-icon.png",
       });
@@ -137,22 +137,8 @@ export default function AnomalyDetectionPage() {
       Notification.requestPermission();
     }
 
-    // Loud alert sound
-    const audio = new Audio("/alert-sound.mp3");
-    audio.volume = 1.0;
-    audio.play();
-
-    // Flash page title
-    let flash = 0;
-    const originalTitle = document.title;
-    const interval = setInterval(() => {
-      document.title = flash % 2 === 0 ? "🚨 NEW ANOMALY!" : originalTitle;
-      flash++;
-      if (flash > 5) {
-        clearInterval(interval);
-        document.title = originalTitle;
-      }
-    }, 500);
+    // Auto hide modal after 5s
+    setTimeout(() => setHebohAnomaly(null), 8000);
   };
 
   const activeCount = anomalies.filter((a) => a.status === "active").length;
@@ -164,18 +150,32 @@ export default function AnomalyDetectionPage() {
   return (
     <div className="flex flex-col h-screen bg-background relative">
       <Header />
-      <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Anomaly Detection
-            </h1>
-            <p className="text-muted-foreground">
-              Real-time monitoring and analysis of ticket anomalies
-            </p>
-          </div>
-        </div>
 
+      {/* HEBOH MODAL */}
+      <AnimatePresence>
+        {hebohAnomaly && (
+          <>
+            <Confetti />
+            <motion.div
+              key={hebohAnomaly.id}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1.1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-red-600/90 text-white p-8 text-center"
+            >
+              <h1 className="text-4xl font-extrabold animate-pulse">
+                🚨 CALO DETECTED!! 🚨
+              </h1>
+              <p className="mt-4 text-2xl font-bold">
+                {hebohAnomaly.title} ({hebohAnomaly.severity})
+              </p>
+              <p className="mt-2 text-lg">{hebohAnomaly.description}</p>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <main className="flex-1 overflow-auto p-6 lg:p-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="shadow-sm">
@@ -241,24 +241,6 @@ export default function AnomalyDetectionPage() {
               </p>
             ) : (
               <div className="overflow-x-auto relative">
-                <AnimatePresence>
-                  {flashAnomaly && (
-                    <motion.div
-                      key={flashAnomaly.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{
-                        opacity: 1,
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      exit={{ opacity: 0 }}
-                      className="absolute top-0 left-1/2 -translate-x-1/2 bg-red-500/30 rounded-lg p-4 z-50 shadow-xl text-white font-bold text-lg"
-                    >
-                      🚨 NEW ANOMALY: {flashAnomaly.title} 🚨
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-muted-foreground">
